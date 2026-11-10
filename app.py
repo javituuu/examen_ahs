@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -394,6 +394,198 @@ app = FastAPI(
 )
 
 
+SALA_TEMPLATE_MAP = {
+    "doomscrolling": "salas/doomscrolling.html",
+    "vanidad": "salas/vanidad.html",
+    "vanity": "salas/vanidad.html",
+    "stalking": "salas/stalking.html",
+    "procrastinacion": "salas/procrastinacion.html",
+    "procrastinación": "salas/procrastinacion.html",
+    "procrastination": "salas/procrastinacion.html",
+}
+
+SALAS_ROUTER_JS = """
+(function() {
+  function normalizePecado(raw) {
+    const v = (raw || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+    if (v.includes("vanid") || v.includes("vanit")) return "vanidad";
+    if (v.includes("stalk")) return "stalking";
+    if (v.includes("procrast")) return "procrastinacion";
+    return "doomscrolling";
+  }
+  const form = document.getElementById("checkin-form");
+  if (!form) return;
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const aliasEl = document.getElementById("alias-input");
+    const pecadoEl = document.getElementById("pecado-select");
+    const alias = (aliasEl && aliasEl.value.trim()) ? aliasEl.value.trim() : "Guest";
+    const pecadoRaw = (pecadoEl && pecadoEl.value) ? pecadoEl.value : "Doomscrolling";
+    sessionStorage.setItem("cortez_alias", alias);
+    sessionStorage.setItem("cortez_pecado", pecadoRaw);
+    const slug = normalizePecado(pecadoRaw);
+    window.location.href = "/sala/" + slug;
+  }, true);
+})();
+"""
+
+SALA_CORE_JS = """
+(function() {
+  function detectMobileOS() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    if (/android/i.test(ua)) return "Android";
+    if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return "iOS";
+    if (/Linux/i.test(ua)) return "Linux";
+    if (/Macintosh|Mac OS X/i.test(ua)) return "macOS";
+    if (/Windows/i.test(ua)) return "Windows";
+    return "Móvil";
+  }
+
+  let clientId = sessionStorage.getItem("cortez_client_id");
+  if (!clientId) {
+    clientId = "guest-" + Math.random().toString(36).substring(2, 9) + "-" + Date.now().toString(36);
+    sessionStorage.setItem("cortez_client_id", clientId);
+  }
+
+  let ws = null;
+  let pendingPixels = 0;
+  let totalPixelsLocal = Number(sessionStorage.getItem("cortez_pixels") || 0);
+  let lastScrollY = window.scrollY;
+
+  function updateMetersHUD() {
+    const el = document.getElementById("hud-meters");
+    if (el) el.textContent = (totalPixelsLocal / 280.0).toFixed(2);
+  }
+
+  function sendPayload(payload) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(payload));
+    }
+  }
+
+  window.addCortezSyntheticPixels = function(px) {
+    pendingPixels += px;
+    totalPixelsLocal += px;
+    sessionStorage.setItem("cortez_pixels", String(totalPixelsLocal));
+    updateMetersHUD();
+  };
+
+  function showEscapeToast(msg) {
+    const toast = document.getElementById("escape-toast");
+    const text = document.getElementById("escape-toast-msg");
+    if (!toast || !text) return;
+    text.textContent = msg;
+    toast.classList.remove("hidden");
+    clearTimeout(window._cortezToastTimer);
+    window._cortezToastTimer = setTimeout(() => toast.classList.add("hidden"), 3600);
+  }
+
+  window.initCortezSala = function(defaultPecado) {
+    const alias = sessionStorage.getItem("cortez_alias") || "Huésped";
+    const pecado = sessionStorage.getItem("cortez_pecado") || defaultPecado;
+    const os = detectMobileOS();
+    updateMetersHUD();
+
+    function connectWS() {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(proto + "//" + window.location.host + "/ws/huesped/" + encodeURIComponent(clientId));
+      ws.onopen = function() {
+        ws.send(JSON.stringify({ type: "checkin", alias: alias, pecado_digital: pecado, os: os }));
+      };
+      ws.onmessage = function(ev) {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === "checkin_ack") {
+            const rEl = document.getElementById("hud-room");
+            const gEl = document.getElementById("hud-guest");
+            if (rEl) rEl.textContent = "HABITACIÓN " + msg.room;
+            if (gEl) gEl.textContent = msg.alias + " • " + msg.pecado_digital;
+          }
+        } catch (e) {}
+      };
+      ws.onclose = function() {
+        setTimeout(connectWS, 1500);
+      };
+    }
+
+    connectWS();
+
+    setInterval(function() {
+      if (pendingPixels <= 0) return;
+      const toSend = Math.round(pendingPixels);
+      pendingPixels = 0;
+      sendPayload({ type: "scroll", pixels: toSend });
+    }, 1000);
+
+    window.addEventListener("scroll", function() {
+      const currentY = window.scrollY;
+      const delta = Math.abs(currentY - lastScrollY);
+      lastScrollY = currentY;
+      if (delta > 0 && delta < 2500) {
+        window.addCortezSyntheticPixels(delta);
+      }
+    }, { passive: true });
+
+    // Dark Pattern 1: Botón Check-Out Evasivo (2 intentos) + Modal (3er intento)
+    let attempts = 0;
+    let lastEvade = 0;
+    const btn = document.getElementById("checkout-btn");
+    const modal = document.getElementById("psych-modal");
+    const stayBtn = document.getElementById("stay-btn");
+
+    if (btn) {
+      function evade(e) {
+        const now = Date.now();
+        if (now - lastEvade < 280) { e.preventDefault(); return; }
+        lastEvade = now;
+        e.preventDefault();
+        e.stopPropagation();
+        attempts++;
+        sendPayload({ type: "escape_attempt", method: "button_click" });
+        if (attempts <= 2) {
+          const rx = (Math.random() > 0.5 ? 1 : -1) * (45 + Math.random() * 95);
+          const ry = -(70 + Math.random() * 240);
+          const rot = (Math.random() - 0.5) * 14;
+          btn.style.transform = "translate(" + rx.toFixed(0) + "px, " + ry.toFixed(0) + "px) rotate(" + rot.toFixed(1) + "deg)";
+          showEscapeToast("Evasión física #" + attempts + ": Intento de Check-Out proyectado en el aula.");
+        } else {
+          btn.style.transform = "translate(0px, 0px) rotate(0deg)";
+          if (modal) modal.classList.remove("hidden");
+          attempts = 0;
+        }
+      }
+      btn.addEventListener("touchstart", evade, { passive: false });
+      btn.addEventListener("mouseover", evade);
+      btn.addEventListener("click", evade);
+    }
+
+    if (stayBtn && modal) {
+      stayBtn.addEventListener("click", function() { modal.classList.add("hidden"); });
+    }
+
+    // Dark Pattern 2: Secuestro del botón Atrás (History API)
+    history.pushState({ cortezTrap: true }, "", window.location.href);
+    history.pushState({ cortezTrap: true }, "", window.location.href);
+    window.addEventListener("popstate", function() {
+      history.pushState({ cortezTrap: true }, "", window.location.href);
+      sendPayload({ type: "escape_attempt", method: "back_button" });
+      showEscapeToast("¡Intento de Fuga! El botón 'Atrás' fue interceptado por el Hotel Cortez.");
+    });
+
+    // Dark Pattern 3: Page Visibility API (Sally)
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden === true) {
+        sendPayload({ type: "escape_attempt", method: "tab_hidden" });
+      } else {
+        showEscapeToast("Sally detectó tu cambio de app o bloqueo de pantalla.");
+      }
+    });
+  };
+})();
+"""
+
+
 @app.get("/", include_in_schema=False)
 async def root_redirect() -> RedirectResponse:
     return RedirectResponse(url="/checkin")
@@ -401,7 +593,35 @@ async def root_redirect() -> RedirectResponse:
 
 @app.get("/checkin", response_class=HTMLResponse)
 async def get_checkin(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request=request, name="checkin.html")
+    """Sirve checkin.html sin modificar el archivo en disco, inyectando el router de salas."""
+    raw_html = (BASE_DIR / "templates" / "checkin.html").read_text(encoding="utf-8")
+    injected = raw_html.replace(
+        "</body>",
+        '<script src="/cortez-salas-router.js"></script></body>',
+    )
+    return HTMLResponse(content=injected)
+
+
+@app.get("/sala/{pecado}", response_class=HTMLResponse)
+async def get_sala(request: Request, pecado: str) -> HTMLResponse:
+    template_name = SALA_TEMPLATE_MAP.get(pecado.lower().strip(), "salas/doomscrolling.html")
+    return templates.TemplateResponse(request=request, name=template_name)
+
+
+@app.get("/api/huespedes-espiados", response_class=JSONResponse)
+async def get_spied_guests() -> JSONResponse:
+    snap = state.build_snapshot()
+    return JSONResponse(content={"guests": snap["guests"]})
+
+
+@app.get("/cortez-salas-router.js")
+async def get_salas_router_js() -> Response:
+    return Response(content=SALAS_ROUTER_JS, media_type="application/javascript")
+
+
+@app.get("/cortez-sala-core.js")
+async def get_sala_core_js() -> Response:
+    return Response(content=SALA_CORE_JS, media_type="application/javascript")
 
 
 @app.get("/panoptico", response_class=HTMLResponse)

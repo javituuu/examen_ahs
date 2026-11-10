@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sala Vanidad — El Espejo de La Condesa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cortez: { black: '#0D0D0D', charcoal: '#151311', gold: '#D4AF37', crimson: '#8B0000', blood: '#C41E3A' }
+          },
+          fontFamily: { deco: ['Cinzel', 'serif'], serif: ['Cormorant Garamond', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0D0D0D; color: #F3EAD6; overflow-x: hidden; }
+    .deco-border { border: 1px solid #D4AF37; box-shadow: 0 0 22px rgba(212, 175, 55, 0.16); }
+    #checkout-btn { transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); touch-action: manipulation; }
+  </style>
+</head>
+<body class="min-h-screen font-sans pb-36 max-w-md mx-auto">
+
+  <!-- Toast de Alerta -->
+  <div id="escape-toast" class="fixed top-3 inset-x-3 z-50 hidden">
+    <div class="bg-cortez-crimson border-2 border-cortez-gold text-white px-4 py-3 shadow-2xl flex items-center justify-between">
+      <p id="escape-toast-msg" class="text-xs font-medium"></p>
+      <span class="text-[10px] font-mono uppercase px-2 py-0.5 bg-black/60 border border-cortez-gold">REC</span>
+    </div>
+  </div>
+
+  <!-- HUD Superior -->
+  <header class="sticky top-0 z-30 bg-cortez-black/95 backdrop-blur-md border-b border-cortez-gold/50 px-4 py-3 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cortez-gold animate-ping"></span>
+        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">HABITACIÓN --</span>
+      </div>
+      <p id="hud-guest" class="text-xs text-amber-100/70">Penthouse: Vanidad (La Condesa)</p>
+    </div>
+    <div class="text-right">
+      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Dosis / Pasillo</p>
+      <p class="font-mono text-base font-bold text-amber-50"><span id="hud-meters">0.0</span> <span class="text-xs text-cortez-gold">m</span></p>
+    </div>
+  </header>
+
+  <main class="px-4 pt-5 space-y-5">
+    <!-- Espejo de La Condesa -->
+    <div class="deco-border bg-cortez-charcoal p-5 text-center space-y-4">
+      <span class="px-2.5 py-0.5 text-[10px] font-mono uppercase bg-cortez-gold/20 text-cortez-gold border border-cortez-gold">
+        Pecado Capital: Vanidad • Psicopolítica (Han)
+      </span>
+      <h1 class="font-deco text-xl font-bold text-cortez-gold">EL ESPEJO DE LA CONDESA</h1>
+      <p class="font-serif italic text-base text-amber-100/85">
+        “Tu relevancia se evapora cada segundo que no recibes aprobación. Toca para reclamar tu dosis o desliza por la galería de espejos.”
+      </p>
+
+      <!-- Barra de Relevancia que se drena en vivo -->
+      <div class="bg-black/70 border border-cortez-gold/40 p-3 text-left space-y-1.5">
+        <div class="flex justify-between text-xs font-mono">
+          <span class="text-cortez-gold uppercase">Nivel de Validación Social:</span>
+          <span id="vanity-pct" class="font-bold text-amber-50">85%</span>
+        </div>
+        <div class="w-full h-3 bg-zinc-900 border border-cortez-gold/30 overflow-hidden">
+          <div id="vanity-bar" class="h-full bg-gradient-to-r from-cortez-crimson via-red-500 to-cortez-gold transition-all duration-300" style="width: 85%"></div>
+        </div>
+        <p id="vanity-status" class="text-[11px] text-amber-100/60 italic">
+          La barra cae cada segundo. No dejes que llegue a 0% frente al aula.
+        </p>
+      </div>
+
+      <!-- Botón de Dopamina Instantánea -->
+      <button
+        id="dopamine-tap-btn"
+        type="button"
+        class="w-full bg-cortez-gold hover:bg-amber-400 active:scale-95 text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3.5 shadow-lg transition cursor-pointer"
+      >
+        🩸 Reclamar Dosis de Aprobación (+1 Like)
+      </button>
+      <p class="font-mono text-xs text-cortez-gold">
+        Gotas de validación extraídas: <strong id="likes-count" class="text-white text-sm">0</strong>
+      </p>
+    </div>
+
+    <!-- Galería infinita de espejos -->
+    <div id="corridor-feed" class="space-y-4"></div>
+  </main>
+
+  <!-- Botón Evasivo -->
+  <div class="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none flex justify-center">
+    <button id="checkout-btn" type="button" class="pointer-events-auto bg-cortez-crimson text-amber-50 border border-cortez-gold px-5 py-2.5 font-deco text-xs uppercase tracking-[0.2em] shadow-2xl">
+      🚪 Hacer Check-Out (Salir)
+    </button>
+  </div>
+
+  <!-- Modal Psicológico -->
+  <div id="psych-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-5">
+    <div class="deco-border bg-cortez-charcoal max-w-sm w-full p-6 text-center space-y-4">
+      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Suite de Elizabeth • La Condesa</p>
+      <h3 class="font-deco text-xl font-bold text-amber-50">¿ABANDONARÁS TU REFLEJO?</h3>
+      <p class="font-serif italic text-base text-amber-100/85">
+        “En la psicopolítica de Byung-Chul Han nadie te obliga a exhibirte: tú mismo te conviertes en vigilante y vitrina.”
+      </p>
+      <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3">
+        Volver al Espejo de Dopamina
+      </button>
+    </div>
+  </div>
+
+  <script src="/cortez-sala-core.js"></script>
+  <script>
+    let vanityScore = 85;
+    let likesCount = 0;
+    const barEl = document.getElementById("vanity-bar");
+    const pctEl = document.getElementById("vanity-pct");
+    const statusEl = document.getElementById("vanity-status");
+    const feed = document.getElementById("corridor-feed");
+
+    const MIRROR_QUOTES = [
+      "“La belleza no es vanidad, es supervivencia en el feed algorítmico.” — La Condesa",
+      " Recompensa Variable (Skinner): No sabes cuántos toques darán el próximo pico de validación.",
+      "“Los espejos del Hotel Cortez no devuelven tu rostro, devuelven métricas de retención.”",
+      "Byung-Chul Han: El 'Me Gusta' es el amén digital con el que nos sometemos voluntariamente."
+    ];
+    let mIdx = 0;
+
+    function addMirrorCards(n = 3) {
+      for (let i = 0; i < n; i++) {
+        const text = MIRROR_QUOTES[mIdx % MIRROR_QUOTES.length];
+        mIdx++;
+        const card = document.createElement("div");
+        card.className = "deco-border bg-cortez-charcoal/85 p-4 space-y-2";
+        card.innerHTML = `
+          <div class="flex justify-between text-[10px] font-mono text-cortez-gold">
+            <span>ESPEJO #${mIdx}</span>
+            <span>♥ +${Math.floor(Math.random() * 90 + 10)} miradas</span>
+          </div>
+          <p class="font-serif italic text-base text-amber-50">${text}</p>
+        `;
+        feed.appendChild(card);
+      }
+    }
+
+    addMirrorCards(4);
+
+    // Drenaje continuo de validación social
+    setInterval(() => {
+      vanityScore = Math.max(4, vanityScore - 4);
+      barEl.style.width = `${vanityScore}%`;
+      pctEl.textContent = `${vanityScore}%`;
+      if (vanityScore < 30) {
+        statusEl.textContent = "⚠️ ¡Tu relevancia está cayendo! Toca el botón dorado o desliza rápido.";
+        statusEl.className = "text-[11px] text-red-400 font-semibold";
+      }
+    }, 900);
+
+    document.getElementById("dopamine-tap-btn").addEventListener("click", () => {
+      likesCount++;
+      vanityScore = Math.min(100, vanityScore + 14);
+      barEl.style.width = `${vanityScore}%`;
+      pctEl.textContent = `${vanityScore}%`;
+      document.getElementById("likes-count").textContent = likesCount;
+      statusEl.textContent = "✨ Dosis de aprobación inyectada. El Panóptico registró tu pulso.";
+      statusEl.className = "text-[11px] text-cortez-gold italic";
+      window.addCortezSyntheticPixels(180);
+    });
+
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight * 0.80) {
+        addMirrorCards(3);
+      }
+    }, { passive: true });
+
+    window.initCortezSala("Vanidad");
+  </script>
+</body>
+</html>
