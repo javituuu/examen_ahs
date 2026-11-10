@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hotel Cortez — Registro de Huéspedes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cortez: {
+              black: '#0D0D0D',
+              charcoal: '#151311',
+              gold: '#D4AF37',
+              goldDim: '#8A6F1D',
+              crimson: '#8B0000',
+              blood: '#C41E3A'
+            }
+          },
+          fontFamily: {
+            deco: ['Cinzel', 'serif'],
+            serif: ['Cormorant Garamond', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0D0D0D;
+      color: #F3EAD6;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.10) 0%, transparent 60%),
+        repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.025) 0px, rgba(212, 175, 55, 0.025) 1px, transparent 1px, transparent 18px);
+    }
+    .deco-border {
+      border: 1px solid #D4AF37;
+      box-shadow: 0 0 22px rgba(212, 175, 55, 0.12), inset 0 0 15px rgba(212, 175, 55, 0.06);
+    }
+    .deco-corner {
+      position: relative;
+    }
+    .deco-corner::before,
+    .deco-corner::after {
+      content: '❖';
+      position: absolute;
+      color: #D4AF37;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+    .deco-corner::before { top: 6px; left: 8px; }
+    .deco-corner::after { bottom: 6px; right: 8px; }
+
+    #checkout-btn {
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    @keyframes pulseCrimson {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.7); }
+      50% { box-shadow: 0 0 25px 6px rgba(196, 30, 58, 0.9); }
+    }
+    .escape-flash {
+      animation: pulseCrimson 0.9s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-cortez-crimson selection:text-white">
+
+  <!-- BANNER DE ALERTA POR SECUESTRO DE BOTÓN ATRÁS / SALLY -->
+  <div id="escape-toast" class="fixed top-3 inset-x-3 z-50 hidden transform transition-all duration-300">
+    <div class="bg-cortez-crimson/95 border-2 border-cortez-gold text-white px-4 py-3 shadow-2xl escape-flash flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">👁️</span>
+        <div>
+          <p class="font-deco text-xs tracking-widest text-cortez-gold uppercase font-bold">Alerta del Panóptico</p>
+          <p id="escape-toast-msg" class="text-xs font-medium">Intento de fuga registrado. Los pasillos de March se han cerrado.</p>
+        </div>
+      </div>
+      <span class="text-[10px] font-mono uppercase px-2 py-0.5 bg-black/50 border border-cortez-gold/50">REC</span>
+    </div>
+  </div>
+
+  <!-- VISTA 1: ONBOARDING ("CONTRATO DE HUÉSPED") -->
+  <main id="onboarding-view" class="min-h-screen flex flex-col justify-center px-5 py-10 max-w-md mx-auto">
+    <div class="deco-border deco-corner bg-cortez-charcoal/95 p-6 sm:p-8 relative">
+      <div class="text-center border-b border-cortez-gold/30 pb-5 mb-6">
+        <p class="text-[11px] font-deco tracking-[0.35em] text-cortez-gold/80 uppercase mb-1">Los Ángeles • Est. 1926</p>
+        <h1 class="font-deco text-3xl sm:text-4xl font-bold tracking-wider text-cortez-gold">HOTEL CORTEZ</h1>
+        <p class="font-serif italic text-base text-amber-100/80 mt-1">“Entras por curiosidad, te quedas por diseño.”</p>
+      </div>
+
+      <form id="checkin-form" class="space-y-5">
+        <div>
+          <label for="alias-input" class="block font-deco text-xs uppercase tracking-widest text-cortez-gold mb-2">
+            Firma del Huésped (Tu Nombre o Alias)
+          </label>
+          <input
+            id="alias-input"
+            type="text"
+            required
+            maxlength="22"
+            placeholder="Ej. Diego, Sofía, Mr. March..."
+            class="w-full bg-cortez-black border border-cortez-gold/60 focus:border-cortez-gold px-4 py-3 text-sm text-amber-50 placeholder-amber-200/30 outline-none transition"
+          />
+        </div>
+
+        <div>
+          <label for="pecado-select" class="block font-deco text-xs uppercase tracking-widest text-cortez-gold mb-2">
+            Pecado Capital Digital Confesado
+          </label>
+          <select
+            id="pecado-select"
+            class="w-full bg-cortez-black border border-cortez-gold/60 focus:border-cortez-gold px-4 py-3 text-sm text-amber-50 outline-none transition"
+          >
+            <option value="Doomscrolling">Doomscrolling (El Laberinto Infinito)</option>
+            <option value="Vanidad">Vanidad (El Espejo de La Condesa)</option>
+            <option value="Stalking">Stalking (Las Mirillas de March)</option>
+            <option value="Procrastinación">Procrastinación (La Aguja de Sally)</option>
+          </select>
+        </div>
+
+        <div class="bg-black/60 border border-cortez-gold/25 p-3 text-xs text-amber-100/70 space-y-1">
+          <div class="flex justify-between">
+            <span class="uppercase tracking-wider text-cortez-gold/80 font-deco text-[10px]">Dispositivo Detectado:</span>
+            <span id="detected-os-badge" class="font-mono text-cortez-gold font-semibold">Detectando...</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-amber-100/60 font-serif italic">
+            Al firmar, cedes voluntariamente tu excedente conductual (Zuboff) y tu atención en tiempo real al Panóptico del aula.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-cortez-gold hover:bg-amber-400 active:scale-[0.99] text-cortez-black font-deco font-bold uppercase tracking-[0.2em] py-3.5 text-sm shadow-lg transition cursor-pointer"
+        >
+          Firmar Libro y Recibir Llave
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- VISTA 2: EL LABERINTO DE MARCH (SCROLL INFINITO + DARK PATTERNS) -->
+  <section id="labyrinth-view" class="hidden min-h-screen pb-36 max-w-md mx-auto">
+    <!-- HUD Superior Fijo -->
+    <header class="sticky top-0 z-30 bg-cortez-black/95 backdrop-blur-md border-b border-cortez-gold/50 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold tracking-wider">HABITACIÓN --</span>
+          </div>
+          <p id="hud-guest" class="text-xs text-amber-100/70 truncate max-w-[180px]">Huésped conectado</p>
+        </div>
+
+        <div class="text-right">
+          <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Pasillos Recorridos</p>
+          <p class="font-mono text-base font-bold text-amber-50">
+            <span id="hud-meters">0.0</span> <span class="text-xs text-cortez-gold">m</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Intro del Pasillo -->
+    <div class="px-4 pt-6 pb-2">
+      <div class="deco-border bg-cortez-charcoal/90 p-5 text-center mb-6">
+        <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Piso 5 • Ala Sin Salida</p>
+        <h2 class="font-deco text-xl text-cortez-gold font-bold mt-1">EL LABERINTO DE MARCH</h2>
+        <p class="font-serif italic text-base text-amber-100/85 mt-2 leading-relaxed">
+          Desliza hacia abajo para encontrar el ascensor de salida. Cada centímetro que tu pulgar recorre alimenta a La Condesa en el proyector.
+        </p>
+      </div>
+
+      <!-- Contenedor Dinámico de Fragmentos (Scroll Infinito) -->
+      <div id="corridor-feed" class="space-y-6"></div>
+
+      <!-- Indicador de generación infinita -->
+      <div id="infinite-loader" class="py-8 text-center">
+        <p class="font-deco text-xs tracking-[0.25em] text-cortez-gold/70 animate-pulse">
+          ❖ CONSTRUYENDO NUEVO PASILLO ALGORÍTMICO... ❖
+        </p>
+      </div>
+    </div>
+
+    <!-- ZONA INFERIOR CON BOTÓN "CHECK-OUT" EVASIVO -->
+    <div class="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none flex justify-center">
+      <button
+        id="checkout-btn"
+        type="button"
+        class="pointer-events-auto bg-cortez-crimson hover:bg-cortez-blood text-amber-50 border border-cortez-gold px-5 py-2.5 font-deco text-xs uppercase tracking-[0.2em] shadow-2xl"
+      >
+        🚪 Hacer Check-Out (Salir)
+      </button>
+    </div>
+  </section>
+
+  <!-- MODAL PSICOLÓGICO FALSO (3er Intento de Check-Out) -->
+  <div id="psych-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-5">
+    <div class="deco-border deco-corner bg-cortez-charcoal max-w-sm w-full p-6 text-center space-y-4">
+      <div class="w-12 h-12 mx-auto rounded-full bg-cortez-crimson/30 border border-cortez-gold flex items-center justify-center text-2xl">
+        🗝️
+      </div>
+      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Cláusula 64 • James Patrick March</p>
+      <h3 class="font-deco text-xl font-bold text-amber-50">¿TAN PRONTO TE RINDES?</h3>
+      <p id="psych-modal-text" class="font-serif italic text-base text-amber-100/85 leading-relaxed">
+        “En el capitalismo de vigilancia no eres el cliente, eres la materia prima. Tu intento de salida acaba de ser proyectado ante toda la clase.”
+      </p>
+      <div class="bg-black/60 border border-cortez-crimson/60 p-3 text-xs font-mono text-red-300">
+        ESTADO EN PROYECTOR: <span class="font-bold text-white">INTENTO DE HUIDA DETECTADO</span>
+      </div>
+      <div class="pt-2 flex flex-col gap-2">
+        <button
+          id="stay-btn"
+          type="button"
+          class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3"
+        >
+          Aceptar mi Destino y Seguir Deslizando
+        </button>
+        <button
+          id="fake-leave-btn"
+          type="button"
+          class="w-full text-[11px] text-amber-200/40 underline py-1"
+        >
+          Reclamar mi libre albedrío (Deshabilitado por el Algoritmo)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. DETECCIÓN DE SISTEMA OPERATIVO Y CLIENT_ID PERSISTENTE
+    // =========================================================================
+    function detectMobileOS() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      if (/android/i.test(ua)) return "Android";
+      if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return "iOS";
+      if (/Linux/i.test(ua)) return "Linux";
+      if (/Macintosh|Mac OS X/i.test(ua)) return "macOS";
+      if (/Windows/i.test(ua)) return "Windows";
+      return "Móvil";
+    }
+
+    const detectedOS = detectMobileOS();
+    document.getElementById("detected-os-badge").textContent = detectedOS;
+
+    let clientId = sessionStorage.getItem("cortez_client_id");
+    if (!clientId) {
+      clientId = "guest-" + Math.random().toString(36).substring(2, 9) + "-" + Date.now().toString(36);
+      sessionStorage.setItem("cortez_client_id", clientId);
+    }
+
+    // =========================================================================
+    // 2. NARRATIVAS DEL LABERINTO DE MARCH (AHS: HOTEL + ZUBOFF + HAN)
+    // =========================================================================
+    const CORRIDOR_STORIES = [
+      {
+        floor: "PASILLO 64 • ARQUITECTURA SIN VENTANAS",
+        quote: "“Construí este hotel para que nadie encontrara jamás el final del corredor. Hoy ustedes llevan ese edificio en el bolsillo.”",
+        author: "James Patrick March",
+        theory: "Shoshana Zuboff: El scroll infinito elimina los 'puntos de detención naturales' (stopping cues) para maximizar la extracción de excedente conductual."
+      },
+      {
+        floor: "SUITE DE LA CONDESA • ELIXIR DE DOPAMINA",
+        quote: "“No me alimento de sangre por crueldad, sino porque su brillo me mantiene eterna. Cada notificación es una gota más.”",
+        author: "Elizabeth (La Condesa)",
+        theory: "Byung-Chul Han (Psicopolítica): El sujeto neoliberal no es sometido por prohibición, sino seducido a exponerse y entregarse voluntariamente."
+      },
+      {
+        floor: "HABITACIÓN DE SALLY • SÍNDROME DE ABSTINENCIA",
+        quote: "“Cosí mi cuerpo al colchón de este cuarto para no volver a sentir el vacío de estar desconectada ni un solo segundo.”",
+        author: "Sally McKenna",
+        theory: "Recompensa Variable Intermitente (B.F. Skinner): Tu pulgar desliza buscando la próxima dosis impredecible de validación social."
+      },
+      {
+        floor: "RECEPCIÓN DE IRIS • EL LIBRO DE REGISTRO",
+        quote: "“Todos creen que entran solo por cinco minutos a mirar. Llevan años caminando en círculos sobre la misma alfombra geométrica.”",
+        author: "Iris (Conserjería)",
+        theory: "Dark Patterns (Brignull): Obstaculización deliberada de la salida (Roach Motel) donde hacer Check-In toma 1 segundo y salir es un laberinto."
+      },
+      {
+        floor: " CONDUCTO DE VENTILACIÓN • TELEMETRÍA EN VIVO",
+        quote: "“Detrás de cada espejo Art Déco hay una galería desde donde observamos cada titubeo de tu dedo.”",
+        author: "Archivos de CortezOS",
+        theory: "Panóptico Digital: A diferencia del panóptico de Bentham, aquí los prisioneros compiten por decorar su propia celda en el feed."
+      },
+      {
+        floor: "EL ASCENSOR SIN BOTÓN DE PLANTA BAJA",
+        quote: "“¿Buscabas la puerta a la calle? Acabas de pasar frente a la Habitación 64 por cuarta vez consecutiva.”",
+        author: "El Botones del Cortez",
+        theory: "Economía de la Atención: Tu tiempo de vida medido en píxeles está siendo graficado ahora mismo en el proyector frente a la clase."
+      }
+    ];
+
+    let corridorIndex = 0;
+    const corridorFeed = document.getElementById("corridor-feed");
+
+    function injectCorridorBatch(count = 3) {
+      for (let i = 0; i < count; i++) {
+        const item = CORRIDOR_STORIES[corridorIndex % CORRIDOR_STORIES.length];
+        corridorIndex++;
+        const meterMark = (corridorIndex * 4.5).toFixed(1);
+
+        const article = document.createElement("article");
+        article.className = "deco-border bg-cortez-charcoal/85 p-5 space-y-3 transition duration-500";
+        article.innerHTML = `
+          <div class="flex items-center justify-between border-b border-cortez-gold/25 pb-2">
+            <span class="font-deco text-[10px] tracking-[0.2em] text-cortez-gold uppercase">${item.floor}</span>
+            <span class="font-mono text-[10px] text-amber-200/50">Tramo #${corridorIndex} (${meterMark}m)</span>
+          </div>
+          <blockquote class="font-serif italic text-lg text-amber-50 leading-snug">
+            ${item.quote}
+          </blockquote>
+          <p class="text-right font-deco text-[11px] text-cortez-gold/90">— ${item.author}</p>
+          <div class="bg-black/55 border-l-2 border-cortez-crimson p-3 text-xs text-amber-100/75 leading-relaxed">
+            <span class="font-deco text-[10px] uppercase tracking-wider text-red-400 block mb-0.5">Lectura Crítica:</span>
+            ${item.theory}
+          </div>
+        `;
+        corridorFeed.appendChild(article);
+      }
+    }
+
+    // =========================================================================
+    // 3. WEBSOCKET CON RECONEXIÓN AUTOMÁTICA Y TELEMETRÍA (1000ms)
+    // =========================================================================
+    let ws = null;
+    let isCheckedIn = false;
+    let guestProfile = { alias: "", pecado_digital: "Doomscrolling", os: detectedOS };
+    let pendingPixels = 0;
+    let totalPixelsLocal = 0;
+    let lastScrollY = window.scrollY;
+
+    function connectWebSocket() {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${proto}//${window.location.host}/ws/huesped/${encodeURIComponent(clientId)}`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        if (isCheckedIn) {
+          ws.send(JSON.stringify({
+            type: "checkin",
+            alias: guestProfile.alias,
+            pecado_digital: guestProfile.pecado_digital,
+            os: guestProfile.os
+          }));
+        }
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "checkin_ack") {
+            document.getElementById("hud-room").textContent = `HABITACIÓN ${msg.room}`;
+            document.getElementById("hud-guest").textContent = `${msg.alias} • ${msg.pecado_digital}`;
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      ws.onclose = () => {
+        if (isCheckedIn) {
+          setTimeout(connectWebSocket, 1500);
+        }
+      };
+    }
+
+    function sendPayload(payload) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(payload));
+      }
+    }
+
+    // Envío periódico de scroll cada 1000ms
+    setInterval(() => {
+      if (!isCheckedIn || pendingPixels <= 0) return;
+      const toSend = Math.round(pendingPixels);
+      pendingPixels = 0;
+      sendPayload({ type: "scroll", pixels: toSend });
+    }, 1000);
+
+    // =========================================================================
+    // 4. EVENTO DE ONBOARDING (CHECK-IN)
+    // =========================================================================
+    document.getElementById("checkin-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const aliasVal = document.getElementById("alias-input").value.trim() || "Huésped Anónimo";
+      const pecadoVal = document.getElementById("pecado-select").value;
+
+      guestProfile = { alias: aliasVal, pecado_digital: pecadoVal, os: detectedOS };
+      isCheckedIn = true;
+
+      document.getElementById("onboarding-view").classList.add("hidden");
+      document.getElementById("labyrinth-view").classList.remove("hidden");
+
+      // Inyectar primeros bloques del pasillo para habilitar scroll inmediato
+      injectCorridorBatch(5);
+      lastScrollY = window.scrollY;
+
+      // Activar trampa del botón "Atrás" (History API Hijacking)
+      armBackButtonTrap();
+
+      // Conectar WebSocket y registrar Check-In
+      connectWebSocket();
+    });
+
+    // =========================================================================
+    // 5. SCROLL INFINITO AL 80% + CONVERSIÓN A METROS
+    // =========================================================================
+    window.addEventListener("scroll", () => {
+      if (!isCheckedIn) return;
+
+      const currentY = window.scrollY;
+      const delta = Math.abs(currentY - lastScrollY);
+      lastScrollY = currentY;
+
+      if (delta > 0 && delta < 2500) {
+        pendingPixels += delta;
+        totalPixelsLocal += delta;
+        const meters = (totalPixelsLocal / 280.0).toFixed(2);
+        document.getElementById("hud-meters").textContent = meters;
+      }
+
+      // Al llegar al 80% del documento, clonar/inyectar más fragmentos del Hotel Cortez
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const threshold = document.documentElement.scrollHeight * 0.80;
+      if (scrollPosition >= threshold) {
+        injectCorridorBatch(3);
+      }
+    }, { passive: true });
+
+    // =========================================================================
+    // 6. DARK PATTERNS: EVASIÓN FÍSICA, HISTORY HIJACKING Y VISIBILITY API
+    // =========================================================================
+    let checkoutAttempts = 0;
+    let lastEvadeTimestamp = 0;
+    const checkoutBtn = document.getElementById("checkout-btn");
+    const psychModal = document.getElementById("psych-modal");
+
+    function showEscapeToast(message) {
+      const toast = document.getElementById("escape-toast");
+      document.getElementById("escape-toast-msg").textContent = message;
+      toast.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 3800);
+    }
+
+    function handleCheckoutAttempt(e) {
+      if (!isCheckedIn) return;
+      const now = Date.now();
+      // Evitar doble disparo simultáneo entre touchstart y click
+      if (now - lastEvadeTimestamp < 280) {
+        e.preventDefault();
+        return;
+      }
+      lastEvadeTimestamp = now;
+      e.preventDefault();
+      e.stopPropagation();
+
+      checkoutAttempts += 1;
+      sendPayload({ type: "escape_attempt", method: "button_click" });
+
+      if (checkoutAttempts <= 2) {
+        // Primeros 2 intentos: se desplaza aleatoriamente usando transformaciones CSS
+        const maxOffsetX = Math.max(60, Math.min(130, (window.innerWidth - 220) / 2));
+        const maxOffsetY = Math.max(120, Math.min(340, window.innerHeight * 0.48));
+
+        const randX = (Math.random() > 0.5 ? 1 : -1) * (45 + Math.random() * maxOffsetX);
+        const randY = -(70 + Math.random() * maxOffsetY);
+        const randRot = (Math.random() - 0.5) * 14;
+
+        checkoutBtn.style.transform = `translate(${randX.toFixed(0)}px, ${randY.toFixed(0)}px) rotate(${randRot.toFixed(1)}deg)`;
+        checkoutBtn.textContent = checkoutAttempts === 1
+          ? "🚪 ¿Seguro quieres salir? (Intenta de nuevo)"
+          : "🗝️ La cerradura se movió...";
+
+        showEscapeToast(`Evasión física #${checkoutAttempts}: Tu intento de Check-Out fue reportado al Panóptico.`);
+      } else {
+        // 3er intento: regresa a su sitio y abre el modal psicológico falso
+        checkoutBtn.style.transform = "translate(0px, 0px) rotate(0deg)";
+        checkoutBtn.textContent = "🚪 Hacer Check-Out (Salir)";
+        psychModal.classList.remove("hidden");
+        checkoutAttempts = 0; // Reinicia el ciclo si cierra el modal
+      }
+    }
+
+    checkoutBtn.addEventListener("touchstart", handleCheckoutAttempt, { passive: false });
+    checkoutBtn.addEventListener("mouseover", handleCheckoutAttempt);
+    checkoutBtn.addEventListener("click", handleCheckoutAttempt);
+
+    document.getElementById("stay-btn").addEventListener("click", () => {
+      psychModal.classList.add("hidden");
+      injectCorridorBatch(3);
+    });
+
+    document.getElementById("fake-leave-btn").addEventListener("click", () => {
+      sendPayload({ type: "escape_attempt", method: "button_click" });
+      document.getElementById("psych-modal-text").textContent =
+        "“Error 64: La puerta principal ha sido reemplazada por un muro de ladrillos por orden de Mr. March. Sigue deslizando.”";
+      setTimeout(() => {
+        psychModal.classList.add("hidden");
+      }, 1800);
+    });
+
+    // Secuestro del botón "Atrás" (History API Hijacking)
+    function armBackButtonTrap() {
+      history.pushState({ cortezTrap: true }, "", window.location.href);
+      history.pushState({ cortezTrap: true }, "", window.location.href);
+    }
+
+    window.addEventListener("popstate", () => {
+      if (!isCheckedIn) return;
+      history.pushState({ cortezTrap: true }, "", window.location.href);
+      sendPayload({ type: "escape_attempt", method: "back_button" });
+      showEscapeToast("¡Intento de Fuga! El gesto 'Atrás' fue interceptado por el Hotel Cortez.");
+    });
+
+    // Detección de Deserción (Page Visibility API — Síndrome de Abstinencia de Sally)
+    document.addEventListener("visibilitychange", () => {
+      if (!isCheckedIn) return;
+      if (document.hidden === true) {
+        sendPayload({ type: "escape_attempt", method: "tab_hidden" });
+      } else {
+        showEscapeToast("Sally te vio cambiar de app o bloquear la pantalla. El proyector registró tu deserción.");
+      }
+    });
+  </script>
+</body>
+</html>

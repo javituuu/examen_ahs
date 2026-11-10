@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CortezOS — El Panóptico de Retención Algorítmica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cortez: {
+              black: '#0D0D0D',
+              panel: '#141210',
+              gold: '#D4AF37',
+              crimson: '#8B0000',
+              alert: '#E11D48'
+            }
+          },
+          fontFamily: {
+            deco: ['Cinzel', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0D0D0D;
+      color: #F5EFE0;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.12) 0%, transparent 65%),
+        repeating-linear-gradient(90deg, rgba(212, 175, 55, 0.02) 0px, rgba(212, 175, 55, 0.02) 1px, transparent 1px, transparent 36px);
+    }
+    .deco-frame {
+      border: 1px solid rgba(212, 175, 55, 0.55);
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.8), inset 0 0 18px rgba(212, 175, 55, 0.05);
+    }
+    @keyframes redAlertBlink {
+      0%, 100% {
+        background-color: rgba(139, 0, 0, 0.88);
+        border-color: #FF2E4C;
+        box-shadow: 0 0 28px rgba(255, 46, 76, 0.85), inset 0 0 15px rgba(255, 255, 255, 0.15);
+        transform: scale(1.015);
+      }
+      50% {
+        background-color: rgba(45, 5, 10, 0.95);
+        border-color: #D4AF37;
+        box-shadow: 0 0 8px rgba(139, 0, 0, 0.5);
+        transform: scale(1.0);
+      }
+    }
+    .room-card-escape {
+      animation: redAlertBlink 0.65s infinite;
+    }
+    .room-card-normal {
+      border: 1px solid rgba(212, 175, 55, 0.65);
+      background: linear-gradient(160deg, rgba(28, 24, 18, 0.95) 0%, rgba(13, 13, 13, 0.98) 100%);
+      box-shadow: 0 0 14px rgba(212, 175, 55, 0.08);
+    }
+    .room-card-offline {
+      border: 1px dashed rgba(212, 175, 55, 0.30);
+      background: rgba(16, 15, 15, 0.75);
+      opacity: 0.72;
+    }
+    /* Scrollbar sutil Art Déco */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0D0D0D; }
+    ::-webkit-scrollbar-thumb { background: #D4AF37; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans select-none">
+
+  <!-- HEADER ART DÉCO DEL PROYECTOR -->
+  <header class="border-b border-cortez-gold/50 bg-cortez-panel/95 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-11 h-11 border-2 border-cortez-gold flex items-center justify-center bg-cortez-black font-deco text-xl font-black text-cortez-gold shadow-inner">
+        64
+      </div>
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="font-deco text-2xl lg:text-3xl font-black tracking-[0.18em] text-cortez-gold">
+            CORTEZ<span class="text-amber-100">OS</span> • EL PANÓPTICO
+          </h1>
+          <span id="ws-status-pill" class="px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50">
+            ● EN VIVO (10Hz)
+          </span>
+          <span id="bot-status-pill" class="hidden px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-amber-950/90 text-cortez-gold border border-cortez-gold/60">
+            ⚡ SIMULACIÓN ACTIVA (15 BOTS)
+          </span>
+        </div>
+        <p class="text-xs text-amber-100/70 tracking-wide">
+          Telemetría de Retención Algorítmica y Patrones Oscuros • <span class="text-cortez-gold font-semibold">American Horror Story: Hotel</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Controles de Recepción (Audio, QR, Bots) -->
+    <div class="flex items-center gap-2.5">
+      <button
+        id="audio-toggle-btn"
+        type="button"
+        class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-gold/70 bg-cortez-black hover:bg-cortez-gold hover:text-cortez-black transition cursor-pointer"
+        title="Activar/Silenciar Campanilla de Recepción (Web Audio API)"
+      >
+        🔔 Timbre: <span id="audio-state-label">ACTIVO</span>
+      </button>
+
+      <button
+        id="qr-modal-btn"
+        type="button"
+        class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-gold bg-cortez-gold/15 hover:bg-cortez-gold hover:text-cortez-black text-cortez-gold font-bold transition cursor-pointer"
+        title="Mostrar Código QR de Check-In (Tecla Q)"
+      >
+        📱 QR Check-In [Q]
+      </button>
+
+      <button
+        id="bot-toggle-btn"
+        type="button"
+        class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-crimson bg-cortez-crimson/30 hover:bg-cortez-crimson text-amber-100 transition cursor-pointer"
+        title="Activar/Desactivar 15 Huéspedes Simulados (Tecla B o S)"
+      >
+        🤖 Contingencia [B]
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 p-5 lg:p-6 grid grid-cols-1 xl:grid-cols-12 gap-5">
+
+    <!-- COLUMNA IZQUIERDA/CENTRAL (8 COLS): CONTADORES TEÓRICOS + MATRIZ DE HABITACIONES -->
+    <section class="xl:col-span-8 flex flex-col gap-5">
+
+      <!-- 3 CONTADORES GLOBALES TEÓRICOS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- 1. Índice La Condesa -->
+        <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">Índice La Condesa</span>
+            <span class="text-xs font-mono text-amber-200/50">ZUBOFF / ATENCIÓN</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="metric-condesa" class="font-mono text-4xl lg:text-5xl font-bold text-amber-50">0</span>
+            <span class="font-deco text-sm text-cortez-gold uppercase">seg robados</span>
+          </div>
+          <p class="mt-1.5 text-xs text-amber-100/65">
+            Tiempo vital acumulado extraído de los teléfonos conectados en la sala.
+          </p>
+        </div>
+
+        <!-- 2. Pasillos de March -->
+        <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">Pasillos de March</span>
+            <span class="text-xs font-mono text-amber-200/50">SCROLL INFINITO</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="metric-march" class="font-mono text-4xl lg:text-5xl font-bold text-cortez-gold">0.0</span>
+            <span class="font-deco text-sm text-amber-100 uppercase">metros</span>
+          </div>
+          <p class="mt-1.5 text-xs text-amber-100/65">
+            Distancia física deslizada con el pulgar (<span id="metric-pixels" class="font-mono text-amber-100">0</span> px totales).
+          </p>
+        </div>
+
+        <!-- 3. Síndrome de Sally (Intentos de Fuga) -->
+        <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden border-cortez-crimson/80">
+          <div class="flex items-center justify-between">
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-red-400">Alertas de Sally</span>
+            <span class="text-xs font-mono text-red-300/60">DARK PATTERNS</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="metric-sally" class="font-mono text-4xl lg:text-5xl font-bold text-red-400">0</span>
+            <span class="font-deco text-sm text-red-200 uppercase">intentos de fuga</span>
+          </div>
+          <p class="mt-1.5 text-xs text-amber-100/65">
+            Toques al botón evasivo, gestos "Atrás" y bloqueos de pantalla interceptados.
+          </p>
+        </div>
+      </div>
+
+      <!-- MATRIZ DE HABITACIONES (GRILLA EN VIVO) -->
+      <div class="deco-frame bg-cortez-panel/90 p-5 flex-1 flex flex-col min-h-[420px]">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cortez-gold/30 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="font-deco text-lg lg:text-xl font-bold tracking-[0.15em] text-cortez-gold uppercase">
+              Matriz de Habitaciones del Hotel Cortez
+            </h2>
+            <span class="text-xs font-mono px-2.5 py-0.5 bg-black/60 border border-cortez-gold/40 text-amber-100">
+              Huéspedes: <strong id="guests-online-count" class="text-cortez-gold">0</strong> activos / <span id="guests-total-count">0</span> registrados
+            </span>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <span class="flex items-center gap-1.5 text-amber-100/80">
+              <span class="w-2.5 h-2.5 inline-block bg-cortez-gold"></span> Retenido (Normal)
+            </span>
+            <span class="flex items-center gap-1.5 text-red-400 font-semibold">
+              <span class="w-2.5 h-2.5 inline-block bg-red-500 animate-ping"></span> Intento de Fuga (Sally)
+            </span>
+            <span class="flex items-center gap-1.5 text-amber-100/40">
+              <span class="w-2.5 h-2.5 inline-block border border-amber-100/40"></span> Atrapado (Offline)
+            </span>
+          </div>
+        </div>
+
+        <!-- Estado vacío cuando aún no escanean -->
+        <div id="empty-rooms-state" class="flex-1 flex flex-col items-center justify-center text-center py-12 px-4 border border-dashed border-cortez-gold/25">
+          <p class="font-deco text-xl text-cortez-gold tracking-widest uppercase mb-2">
+            ❖ Recepción Abierta • Esperando Huéspedes ❖
+          </p>
+          <p class="text-sm text-amber-100/70 max-w-lg mb-4">
+            Escanea el código QR para firmar el Libro de Registro en <code class="font-mono text-cortez-gold">/checkin</code> o presiona la tecla <kbd class="px-2 py-0.5 bg-black border border-cortez-gold text-cortez-gold font-mono text-xs">B</kbd> para desplegar los 15 huéspedes de contingencia.
+          </p>
+          <p id="checkin-url-banner" class="font-mono text-xs text-cortez-gold bg-black/70 px-4 py-2 border border-cortez-gold/40"></p>
+        </div>
+
+        <!-- Grilla dinámica de tarjetas -->
+        <div id="rooms-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3.5 overflow-y-auto max-h-[540px] pr-1"></div>
+      </div>
+    </section>
+
+    <!-- COLUMNA DERECHA (4 COLS): CHART.JS EN VIVO + LOG TERMINAL DE SALLY -->
+    <aside class="xl:col-span-4 flex flex-col gap-5">
+
+      <!-- CURVA DE EXTRACCIÓN DE DOPAMINA (Chart.js) -->
+      <div class="deco-frame bg-cortez-panel p-4">
+        <div class="flex items-center justify-between border-b border-cortez-gold/30 pb-2.5 mb-3">
+          <div>
+            <h2 class="font-deco text-sm lg:text-base font-bold tracking-[0.15em] text-cortez-gold uppercase">
+              Curva de Extracción de Dopamina
+            </h2>
+            <p class="text-[11px] text-amber-100/60">Metros deslizados vs. Anomalías de Evasión (Tiempo Real)</p>
+          </div>
+          <span class="font-mono text-[10px] text-cortez-gold px-2 py-0.5 bg-black/60 border border-cortez-gold/30">LIVE</span>
+        </div>
+        <div class="h-52 relative">
+          <canvas id="dopamine-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- TERMINAL EN VIVO: ALERTAS DE SALLY -->
+      <div class="deco-frame bg-cortez-panel p-4 flex-1 flex flex-col min-h-[310px]">
+        <div class="flex items-center justify-between border-b border-cortez-gold/30 pb-2.5 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <h2 class="font-deco text-sm lg:text-base font-bold tracking-[0.15em] text-cortez-gold uppercase">
+              Terminal de Vigilancia (Sally Log)
+            </h2>
+          </div>
+          <span class="font-mono text-[10px] text-amber-100/50">/var/log/cortez.log</span>
+        </div>
+
+        <div id="sally-terminal" class="flex-1 bg-black/80 border border-cortez-gold/25 p-3 font-mono text-xs overflow-y-auto max-h-[360px] space-y-2">
+          <div class="text-cortez-gold/80">
+            [SISTEMA] CortezOS inicializado en memoria RAM. Esperando telemetría de móviles...
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- MODAL DE CÓDIGO QR PARA LA CLASE -->
+  <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
+    <div class="deco-frame bg-cortez-panel max-w-md w-full p-7 text-center space-y-5">
+      <p class="font-deco text-xs tracking-[0.3em] text-cortez-gold uppercase">Recepción del Hotel Cortez</p>
+      <h3 class="font-deco text-2xl font-bold text-amber-50">ESCANEA PARA HACER CHECK-IN</h3>
+      <div class="bg-white p-5 inline-block mx-auto border-4 border-cortez-gold shadow-2xl">
+        <div id="qrcode-canvas"></div>
+      </div>
+      <p id="qr-url-text" class="font-mono text-sm text-cortez-gold break-all bg-black/70 p-2.5 border border-cortez-gold/40"></p>
+      <p class="text-xs text-amber-100/70">
+        Si usas <code class="font-mono text-cortez-gold">cloudflared</code>, abre el Panóptico desde la URL HTTPS del túnel para que el QR apunte automáticamente al enlace público.
+      </p>
+      <button
+        id="close-qr-btn"
+        type="button"
+        class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3 cursor-pointer"
+      >
+        Cerrar [Esc / Q]
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. WEB AUDIO API: CAMPANILLA DE RECEPCIÓN DEL HOTEL CORTEZ Y ALARMA SALLY
+    // =========================================================================
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    // Sonido de campanilla de recepción Art Déco ("Ding" metálico armónico)
+    function playReceptionBell() {
+      if (!audioEnabled) return;
+      try {
+        ensureAudioContext();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+        // Dos parciales inarmónicos de campana de bronce (Hotel Desk Bell)
+        const freqs = [1318.5, 2637.0, 3520.0];
+        freqs.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = idx === 0 ? "sine" : "triangle";
+          osc.frequency.setValueAtTime(freq, now);
+
+          const peak = idx === 0 ? 0.22 : 0.08 / idx;
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.exponentialRampToValueAtTime(peak, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + (idx === 0 ? 1.35 : 0.65));
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 1.4);
+        });
+      } catch (e) {
+        console.warn("Web Audio API pendiente de interacción:", e);
+      }
+    }
+
+    // Alerta sonora sutil cuando un huésped intenta escapar
+    function playEscapeBuzzer() {
+      if (!audioEnabled) return;
+      try {
+        ensureAudioContext();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(165, now + 0.28);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.34);
+      } catch (e) {}
+    }
+
+    document.getElementById("audio-toggle-btn").addEventListener("click", () => {
+      ensureAudioContext();
+      audioEnabled = !audioEnabled;
+      document.getElementById("audio-state-label").textContent = audioEnabled ? "ACTIVO" : "MUTE";
+      if (audioEnabled) playReceptionBell();
+    });
+
+    // Desbloquear AudioContext al primer clic o tecla del expositor
+    window.addEventListener("click", ensureAudioContext, { once: true });
+
+    // =========================================================================
+    // 2. CHART.JS: CURVA DE EXTRACCIÓN DE DOPAMINA EN TIEMPO REAL
+    // =========================================================================
+    const ctxChart = document.getElementById("dopamine-chart").getContext("2d");
+    const MAX_POINTS = 30;
+    const chartData = {
+      labels: [],
+      datasets: [
+        {
+          label: "Pasillos de March (m)",
+          data: [],
+          borderColor: "#D4AF37",
+          backgroundColor: "rgba(212, 175, 55, 0.15)",
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.35,
+          pointRadius: 2,
+          yAxisID: "y"
+        },
+        {
+          label: "Intentos de Fuga (Sally)",
+          data: [],
+          borderColor: "#FF2E4C",
+          backgroundColor: "rgba(255, 46, 76, 0.15)",
+          borderWidth: 2,
+          borderDash: [4, 4],
+          tension: 0.25,
+          pointRadius: 2,
+          yAxisID: "y1"
+        }
+      ]
+    };
+
+    const dopamineChart = new Chart(ctxChart, {
+      type: "line",
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 250 },
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: "#F5EFE0", font: { family: "Inter", size: 11 } }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: "rgba(245, 239, 224, 0.5)", font: { family: "JetBrains Mono", size: 10 }, maxTicksLimit: 6 },
+            grid: { color: "rgba(212, 175, 55, 0.08)" }
+          },
+          y: {
+            type: "linear",
+            position: "left",
+            beginAtZero: true,
+            ticks: { color: "#D4AF37", font: { family: "JetBrains Mono", size: 10 } },
+            grid: { color: "rgba(212, 175, 55, 0.12)" }
+          },
+          y1: {
+            type: "linear",
+            position: "right",
+            beginAtZero: true,
+            ticks: { color: "#FF2E4C", stepSize: 1, font: { family: "JetBrains Mono", size: 10 } },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
+    });
+
+    let latestMetrics = {
+      pasillos_march_meters: 0,
+      total_escape_attempts: 0
+    };
+
+    // Actualizar la gráfica cada 1 segundo para mantener lectura fluida en proyector
+    setInterval(() => {
+      const nowLabel = new Date().toLocaleTimeString("es-CL", { hour12: false });
+      chartData.labels.push(nowLabel);
+      chartData.datasets[0].data.push(latestMetrics.pasillos_march_meters);
+      chartData.datasets[1].data.push(latestMetrics.total_escape_attempts);
+
+      if (chartData.labels.length > MAX_POINTS) {
+        chartData.labels.shift();
+        chartData.datasets[0].data.shift();
+        chartData.datasets[1].data.shift();
+      }
+      dopamineChart.update("none");
+    }, 1000);
+
+    // =========================================================================
+    // 3. RENDERIZADO QUIRÚRGICO DE HABITACIONES Y TERMINAL DE SALLY
+    // =========================================================================
+    const roomsGrid = document.getElementById("rooms-grid");
+    const emptyRoomsState = document.getElementById("empty-rooms-state");
+    const sallyTerminal = document.getElementById("sally-terminal");
+    let renderedLogIds = new Set();
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderSnapshot(snapshot) {
+      const m = snapshot.metrics;
+      latestMetrics = m;
+
+      // 1. Contadores superiores
+      document.getElementById("metric-condesa").textContent = m.indice_condesa_seconds.toLocaleString("es-CL");
+      document.getElementById("metric-march").textContent = m.pasillos_march_meters.toFixed(1);
+      document.getElementById("metric-pixels").textContent = m.total_pixels.toLocaleString("es-CL");
+      document.getElementById("metric-sally").textContent = m.total_escape_attempts;
+
+      document.getElementById("guests-online-count").textContent = m.online_guests;
+      document.getElementById("guests-total-count").textContent = m.total_guests;
+
+      const botPill = document.getElementById("bot-status-pill");
+      if (m.bots_active) {
+        botPill.classList.remove("hidden");
+      } else {
+        botPill.classList.add("hidden");
+      }
+
+      // 2. Sonidos por triggers instantáneos
+      if (snapshot.trigger) {
+        if (snapshot.trigger.kind === "new_guest") {
+          playReceptionBell();
+        } else if (snapshot.trigger.kind === "escape_attempt") {
+          playEscapeBuzzer();
+        }
+      }
+
+      // 3. Matriz de Habitaciones (actualización quirúrgica por client_id)
+      const guests = snapshot.guests || [];
+      if (guests.length === 0) {
+        emptyRoomsState.classList.remove("hidden");
+        roomsGrid.classList.add("hidden");
+        roomsGrid.innerHTML = "";
+      } else {
+        emptyRoomsState.classList.add("hidden");
+        roomsGrid.classList.remove("hidden");
+
+        const activeIds = new Set();
+        guests.forEach((g) => {
+          activeIds.add(g.client_id);
+          let card = document.getElementById(`room-card-${g.client_id}`);
+          if (!card) {
+            card = document.createElement("div");
+            card.id = `room-card-${g.client_id}`;
+            card.className = "p-3.5 transition-all duration-200 flex flex-col justify-between";
+            roomsGrid.appendChild(card);
+          }
+
+          // Estilo según estado: normal (dorado), escape (rojo parpadeante), offline (gris/opaco)
+          let stateClass = "room-card-normal";
+          let statusBadgeClass = "bg-emerald-950/90 text-emerald-300 border-emerald-500/40";
+          if (g.alert_state === "escape") {
+            stateClass = "room-card-escape";
+            statusBadgeClass = "bg-black/90 text-red-300 border-red-400 font-bold";
+          } else if (!g.online || g.alert_state === "offline") {
+            stateClass = "room-card-offline";
+            statusBadgeClass = "bg-zinc-900 text-amber-200/50 border-amber-200/20";
+          }
+
+          card.className = `p-3.5 transition-all duration-200 flex flex-col justify-between ${stateClass}`;
+
+          const roomLabel = g.room === 1 ? "HABITACIÓN 1 (SUITE 64)" : `HABITACIÓN ${g.room}`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-1 border-b border-cortez-gold/25 pb-1.5 mb-2">
+                <span class="font-deco text-xs font-bold tracking-wider text-cortez-gold">${roomLabel}</span>
+                <span class="font-mono text-[10px] px-1.5 py-0.5 bg-black/60 border border-cortez-gold/30 text-amber-100/90">
+                  ${escapeHtml(g.os)}
+                </span>
+              </div>
+              <div class="flex items-baseline justify-between gap-2">
+                <h3 class="font-bold text-base text-amber-50 truncate">${escapeHtml(g.alias)}</h3>
+                <span class="text-[11px] font-serif italic text-cortez-gold/90 shrink-0">${escapeHtml(g.pecado_digital)}</span>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-white/10 space-y-1.5">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-amber-100/60">Pasillo: <strong class="text-amber-50">${g.meters.toFixed(1)}m</strong></span>
+                <span class="text-amber-100/60">Fugas: <strong class="${g.escape_attempts > 0 ? 'text-red-300' : 'text-amber-50'}">${g.escape_attempts}</strong></span>
+              </div>
+              <div class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 border text-center truncate ${statusBadgeClass}">
+                ${escapeHtml(g.status)}
+              </div>
+            </div>
+          `;
+        });
+
+        // Limpiar tarjetas que ya no existan tras un reset
+        Array.from(roomsGrid.children).forEach((el) => {
+          const cid = el.id.replace("room-card-", "");
+          if (!activeIds.has(cid)) {
+            el.remove();
+          }
+        });
+      }
+
+      // 4. Terminal de Sally (Logs en vivo)
+      const logs = snapshot.logs || [];
+      logs.slice().reverse().forEach((entry) => {
+        if (renderedLogIds.has(entry.id)) return;
+        renderedLogIds.add(entry.id);
+
+        const row = document.createElement("div");
+        let colorClass = "text-amber-100/85";
+        if (entry.severity === "escape") {
+          colorClass = "text-red-400 font-semibold bg-red-950/30 border-l-2 border-red-500 pl-2 py-0.5";
+        } else if (entry.severity === "checkin") {
+          colorClass = "text-cortez-gold";
+        } else if (entry.severity === "offline") {
+          colorClass = "text-amber-200/50 italic";
+        }
+
+        row.className = `leading-relaxed ${colorClass}`;
+        row.innerHTML = `<span class="text-amber-200/40">[${escapeHtml(entry.time)}]</span> ${escapeHtml(entry.message)}`;
+        sallyTerminal.prepend(row);
+
+        while (sallyTerminal.children.length > 35) {
+          sallyTerminal.lastElementChild.remove();
+        }
+      });
+    }
+
+    // =========================================================================
+    // 4. CONEXIÓN WEBSOCKET DEL PANÓPTICO + FALLBACK LOCAL DE BOTS (TECLA B / S)
+    // =========================================================================
+    let panopticoWs = null;
+    let localFallbackTimer = null;
+    let localBotsState = null;
+
+    function connectPanopticoWS() {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${proto}//${window.location.host}/ws/panoptico`;
+      panopticoWs = new WebSocket(wsUrl);
+
+      const pill = document.getElementById("ws-status-pill");
+
+      panopticoWs.onopen = () => {
+        pill.textContent = "● EN VIVO (10Hz)";
+        pill.className = "px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50";
+      };
+
+      panopticoWs.onmessage = (event) => {
+        try {
+          const snapshot = JSON.parse(event.data);
+          if (snapshot.type === "snapshot") {
+            renderSnapshot(snapshot);
+          }
+        } catch (err) {
+          console.error("Error procesando snapshot:", err);
+        }
+      };
+
+      panopticoWs.onclose = () => {
+        pill.textContent = "○ RECONECTANDO...";
+        pill.className = "px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-red-950/90 text-red-300 border border-red-500/50";
+        setTimeout(connectPanopticoWS, 1500);
+      };
+    }
+
+    // Generador de contingencia: usa el motor del servidor si hay WS, o simula en local si el WS cayó
+    function triggerContingencyBots() {
+      ensureAudioContext();
+      if (panopticoWs && panopticoWs.readyState === WebSocket.OPEN) {
+        panopticoWs.send(JSON.stringify({ action: "toggle_bots" }));
+        return;
+      }
+      // Fallback 100% cliente si ni siquiera hubiera backend alcanzable
+      startPureClientSideBots();
+    }
+
+    function startPureClientSideBots() {
+      if (localFallbackTimer) {
+        clearInterval(localFallbackTimer);
+        localFallbackTimer = null;
+        return;
+      }
+      const names = [
+        ["Diego", "Doomscrolling", "Android"],
+        ["Valentina", "Vanidad", "iOS"],
+        ["Matías", "Procrastinación", "Android"],
+        ["Camila", "Stalking", "iOS"],
+        ["Sebastián", "Doomscrolling", "Android"],
+        ["Francisca", "Vanidad", "iOS"],
+        ["Nicolás", "Procrastinación", "Android"],
+        ["Javiera", "Stalking", "iOS"],
+        ["Benjamín", "Doomscrolling", "Android"],
+        ["Antonia", "Vanidad", "iOS"],
+        ["Tomás", "Procrastinación", "Android"],
+        ["Catalina", "Stalking", "iOS"],
+        ["Lucas", "Doomscrolling", "Android"],
+        ["Fernanda", "Procrastinación", "iOS"],
+        ["Ignacio", "Stalking", "Android"]
+      ];
+      localBotsState = {
+        indice_condesa_seconds: 0,
+        pasillos_march_meters: 0,
+        total_pixels: 0,
+        total_escape_attempts: 0,
+        guests: names.map((n, i) => ({
+          client_id: `local-bot-${i + 1}`,
+          room: i + 1,
+          alias: n[0],
+          pecado_digital: n[1],
+          os: n[2],
+          status: "EN EL LABERINTO",
+          alert_state: "normal",
+          pixels: 0,
+          meters: 0,
+          escape_attempts: 0,
+          online: true
+        })),
+        logs: []
+      };
+      playReceptionBell();
+      localFallbackTimer = setInterval(() => {
+        localBotsState.indice_condesa_seconds += 15;
+        let trigger = null;
+        localBotsState.guests.forEach((g) => {
+          const px = Math.floor(Math.random() * 280);
+          g.pixels += px;
+          g.meters = +(g.pixels / 280).toFixed(2);
+          g.alert_state = "normal";
+          g.status = "DESLIZANDO EN EL LABERINTO";
+        });
+        if (Math.random() < 0.35) {
+          const target = localBotsState.guests[Math.floor(Math.random() * localBotsState.guests.length)];
+          target.escape_attempts += 1;
+          target.alert_state = "escape";
+          target.status = "INTENTO DE HUIDA (SALLY)";
+          localBotsState.total_escape_attempts += 1;
+          trigger = { kind: "escape_attempt" };
+          localBotsState.logs.unshift({
+            id: "l-" + Date.now() + Math.random(),
+            time: new Date().toLocaleTimeString("es-CL", { hour12: false }),
+            message: `ALERTA SALLY — Hab. ${target.room} (${target.alias}): Síndrome de Abstinencia detectado`,
+            severity: "escape"
+          });
+        }
+        localBotsState.total_pixels = localBotsState.guests.reduce((a, b) => a + b.pixels, 0);
+        localBotsState.pasillos_march_meters = +(localBotsState.total_pixels / 280).toFixed(2);
+        renderSnapshot({
+          type: "snapshot",
+          metrics: {
+            indice_condesa_seconds: localBotsState.indice_condesa_seconds,
+            pasillos_march_meters: localBotsState.pasillos_march_meters,
+            total_pixels: localBotsState.total_pixels,
+            total_guests: 15,
+            online_guests: 15,
+            escaping_guests: 1,
+            total_escape_attempts: localBotsState.total_escape_attempts,
+            bots_active: true
+          },
+          guests: localBotsState.guests,
+          logs: localBotsState.logs.slice(0, 20),
+          trigger
+        });
+      }, 800);
+    }
+
+    document.getElementById("bot-toggle-btn").addEventListener("click", triggerContingencyBots);
+
+    // =========================================================================
+    // 5. ATAJOS DE TECLADO (TECLA 'B' Y 'S' PARA BOTS, 'Q' PARA QR) + GENERADOR QR
+    // =========================================================================
+    const checkinUrl = `${window.location.origin}/checkin`;
+    document.getElementById("checkin-url-banner").textContent = `URL de acceso: ${checkinUrl}`;
+    document.getElementById("qr-url-text").textContent = checkinUrl;
+
+    let qrRendered = false;
+    function toggleQrModal() {
+      const modal = document.getElementById("qr-modal");
+      const isHidden = modal.classList.contains("hidden");
+      if (isHidden) {
+        modal.classList.remove("hidden");
+        if (!qrRendered && typeof QRCode !== "undefined") {
+          new QRCode(document.getElementById("qrcode-canvas"), {
+            text: checkinUrl,
+            width: 220,
+            height: 220,
+            colorDark: "#0D0D0D",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          qrRendered = true;
+        }
+      } else {
+        modal.classList.add("hidden");
+      }
+    }
+
+    document.getElementById("qr-modal-btn").addEventListener("click", toggleQrModal);
+    document.getElementById("close-qr-btn").addEventListener("click", toggleQrModal);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      const key = e.key.toLowerCase();
+      if (key === "b" || key === "s") {
+        // Cubre tanto Tecla B (Prompt/TC-04) como Tecla S (Plan de Desarrollo)
+        triggerContingencyBots();
+      } else if (key === "q") {
+        toggleQrModal();
+      } else if (key === "escape") {
+        document.getElementById("qr-modal").classList.add("hidden");
+      }
+    });
+
+    connectPanopticoWS();
+  </script>
+</body>
+</html>
