@@ -118,7 +118,7 @@
         id="qr-modal-btn"
         type="button"
         class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-gold bg-cortez-gold/15 hover:bg-cortez-gold hover:text-cortez-black text-cortez-gold font-bold transition cursor-pointer"
-        title="Mostrar Código QR de Check-In (Tecla Q)"
+        title="Show Check-In QR Code (Q key)"
       >
         📱 QR Check-In [Q]
       </button>
@@ -127,7 +127,7 @@
         id="bot-toggle-btn"
         type="button"
         class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-crimson bg-cortez-crimson/30 hover:bg-cortez-crimson text-amber-100 transition cursor-pointer"
-        title="Activar/Desactivar 15 Huéspedes Simulados (Tecla B o S)"
+        title="Turn On/Off 15 Simulated Guests (Keys B or S)"
       >
         🤖 Contingencia [B]
       </button>
@@ -168,22 +168,22 @@
             <span class="font-deco text-sm text-amber-100 uppercase">metros</span>
           </div>
           <p class="mt-1.5 text-xs text-amber-100/65">
-            Distancia física deslizada con el pulgar (<span id="metric-pixels" class="font-mono text-amber-100">0</span> px totales).
+            Total distance scrolled (<span id="metric-pixels" class="font-mono text-amber-100">0</span> px totales).
           </p>
         </div>
 
         <!-- 3. Síndrome de Sally (Intentos de Fuga) -->
         <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden border-cortez-crimson/80">
           <div class="flex items-center justify-between">
-            <span class="font-deco text-xs uppercase tracking-[0.2em] text-red-400">Alertas de Sally</span>
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-red-400">Sally's Alerts</span>
             <span class="text-xs font-mono text-red-300/60">DARK PATTERNS</span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
             <span id="metric-sally" class="font-mono text-4xl lg:text-5xl font-bold text-red-400">0</span>
-            <span class="font-deco text-sm text-red-200 uppercase">intentos de fuga</span>
+            <span class="font-deco text-sm text-red-200 uppercase">Escape Attempts</span>
           </div>
           <p class="mt-1.5 text-xs text-amber-100/65">
-            Toques al botón evasivo, gestos "Atrás" y bloqueos de pantalla interceptados.
+            Pressing the button, gestos "Atrás" y bloqueos de pantalla interceptados.
           </p>
         </div>
       </div>
@@ -193,21 +193,21 @@
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cortez-gold/30 pb-3 mb-4">
           <div class="flex items-center gap-3">
             <h2 class="font-deco text-lg lg:text-xl font-bold tracking-[0.15em] text-cortez-gold uppercase">
-              Matriz de Habitaciones del Hotel Cortez
+              Cortex Hotel Rooms Matrix
             </h2>
             <span class="text-xs font-mono px-2.5 py-0.5 bg-black/60 border border-cortez-gold/40 text-amber-100">
-              Huéspedes: <strong id="guests-online-count" class="text-cortez-gold">0</strong> activos / <span id="guests-total-count">0</span> registrados
+              Guests: <strong id="guests-online-count" class="text-cortez-gold">0</strong> online / <span id="guests-total-count">0</span> registered
             </span>
           </div>
           <div class="flex items-center gap-4 text-xs">
             <span class="flex items-center gap-1.5 text-amber-100/80">
-              <span class="w-2.5 h-2.5 inline-block bg-cortez-gold"></span> Retenido (Normal)
+              <span class="w-2.5 h-2.5 inline-block bg-cortez-gold"></span> Retained (Normal)
             </span>
             <span class="flex items-center gap-1.5 text-red-400 font-semibold">
-              <span class="w-2.5 h-2.5 inline-block bg-red-500 animate-ping"></span> Intento de Fuga (Sally)
+              <span class="w-2.5 h-2.5 inline-block bg-red-500 animate-ping"></span> Escape Attempt (Sally)
             </span>
             <span class="flex items-center gap-1.5 text-amber-100/40">
-              <span class="w-2.5 h-2.5 inline-block border border-amber-100/40"></span> Atrapado (Offline)
+              <span class="w-2.5 h-2.5 inline-block border border-amber-100/40"></span> Trapped (Offline)
             </span>
           </div>
         </div>
@@ -215,10 +215,10 @@
         <!-- Estado vacío cuando aún no escanean -->
         <div id="empty-rooms-state" class="flex-1 flex flex-col items-center justify-center text-center py-12 px-4 border border-dashed border-cortez-gold/25">
           <p class="font-deco text-xl text-cortez-gold tracking-widest uppercase mb-2">
-            ❖ Recepción Abierta • Esperando Huéspedes ❖
+            ❖ Open Reception • Awaiting Guests ❖
           </p>
           <p class="text-sm text-amber-100/70 max-w-lg mb-4">
-            Escanea el código QR para firmar el Libro de Registro en <code class="font-mono text-cortez-gold">/checkin</code> o presiona la tecla <kbd class="px-2 py-0.5 bg-black border border-cortez-gold text-cortez-gold font-mono text-xs">B</kbd> para desplegar los 15 huéspedes de contingencia.
+            Scan the QR code to sign the guest register at <code class="font-mono text-cortez-gold">/checkin</code> or press the <kbd class="px-2 py-0.5 bg-black border border-cortez-gold text-cortez-gold font-mono text-xs">B</kbd> key to display the 15 contingency guests.
           </p>
           <p id="checkin-url-banner" class="font-mono text-xs text-cortez-gold bg-black/70 px-4 py-2 border border-cortez-gold/40"></p>
         </div>
@@ -236,9 +236,9 @@
         <div class="flex items-center justify-between border-b border-cortez-gold/30 pb-2.5 mb-3">
           <div>
             <h2 class="font-deco text-sm lg:text-base font-bold tracking-[0.15em] text-cortez-gold uppercase">
-              Curva de Extracción de Dopamina
+              Dopamine Extraction Curve
             </h2>
-            <p class="text-[11px] text-amber-100/60">Metros deslizados vs. Anomalías de Evasión (Tiempo Real)</p>
+            <p class="text-[11px] text-amber-100/60">Meters Scrolled vs. Escape Anomalies (Live)</p>
           </div>
           <span class="font-mono text-[10px] text-cortez-gold px-2 py-0.5 bg-black/60 border border-cortez-gold/30">LIVE</span>
         </div>
@@ -253,7 +253,7 @@
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
             <h2 class="font-deco text-sm lg:text-base font-bold tracking-[0.15em] text-cortez-gold uppercase">
-              Terminal de Vigilancia (Sally Log)
+              Surveillance Terminal (Sally Log)
             </h2>
           </div>
           <span class="font-mono text-[10px] text-amber-100/50">/var/log/cortez.log</span>
@@ -261,7 +261,7 @@
 
         <div id="sally-terminal" class="flex-1 bg-black/80 border border-cortez-gold/25 p-3 font-mono text-xs overflow-y-auto max-h-[360px] space-y-2">
           <div class="text-cortez-gold/80">
-            [SISTEMA] CortezOS inicializado en memoria RAM. Esperando telemetría de móviles...
+            [SYSTEM] CortezOS initializing in RAM. Awaiting mobile telemetry...
           </div>
         </div>
       </div>
@@ -272,21 +272,21 @@
   <!-- MODAL DE CÓDIGO QR PARA LA CLASE -->
   <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
     <div class="deco-frame bg-cortez-panel max-w-md w-full p-7 text-center space-y-5">
-      <p class="font-deco text-xs tracking-[0.3em] text-cortez-gold uppercase">Recepción del Hotel Cortez</p>
-      <h3 class="font-deco text-2xl font-bold text-amber-50">ESCANEA PARA HACER CHECK-IN</h3>
+      <p class="font-deco text-xs tracking-[0.3em] text-cortez-gold uppercase">Reception of the Cortex Hotel</p>
+      <h3 class="font-deco text-2xl font-bold text-amber-50">SCAN TO CHECK-IN</h3>
       <div class="bg-white p-5 inline-block mx-auto border-4 border-cortez-gold shadow-2xl">
         <div id="qrcode-canvas"></div>
       </div>
       <p id="qr-url-text" class="font-mono text-sm text-cortez-gold break-all bg-black/70 p-2.5 border border-cortez-gold/40"></p>
       <p class="text-xs text-amber-100/70">
-        Si usas <code class="font-mono text-cortez-gold">cloudflared</code>, abre el Panóptico desde la URL HTTPS del túnel para que el QR apunte automáticamente al enlace público.
+        If you are using <code class="font-mono text-cortez-gold">cloudflared</code>, open the Panopticon from the HTTPS URL of the tunnel so that the QR code points automatically to the public link.
       </p>
       <button
         id="close-qr-btn"
         type="button"
         class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3 cursor-pointer"
       >
-        Cerrar [Esc / Q]
+        Close [Esc / Q]
       </button>
     </div>
   </div>
