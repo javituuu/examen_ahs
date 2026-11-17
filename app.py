@@ -15,31 +15,31 @@ from fastapi.templating import Jinja2Templates
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-# Pixels a "metros de pasillo del Hotel Cortez" (escala inmersiva para móviles)
+# Pixels to "Cortez Hotel corridor meters" (immersive mobile scale)
 PIXELS_PER_METER = 280.0
 
 ESCAPE_METHOD_LABELS = {
-    "button_click": "Evasión Física (Botón Check-Out)",
-    "tab_hidden": "Síndrome de Abstinencia (Sally / Cambio de App o Bloqueo)",
-    "back_button": "Intento de Fuga (Secuestro de Botón Atrás)",
-    "modal_trap": "Sometimiento Psicológico (Cláusula March)",
+    "button_click": "Physical Evasion (Check-Out Button)",
+    "tab_hidden": "Withdrawal Syndrome (Sally / App Switch or Screen Lock)",
+    "back_button": "Escape Attempt (Back Button Hijack)",
+    "modal_trap": "Psychological Submission (March Clause)",
 }
 
 BOT_PROFILES = [
     ("Diego", "Doomscrolling", "Android"),
-    ("Valentina", "Vanidad", "iOS"),
-    ("Matías", "Procrastinación", "Android"),
+    ("Valentina", "Vanity", "iOS"),
+    ("Matías", "Procrastination", "Android"),
     ("Camila", "Stalking", "iOS"),
     ("Sebastián", "Doomscrolling", "Android"),
-    ("Francisca", "Vanidad", "iOS"),
-    ("Nicolás", "Procrastinación", "Android"),
+    ("Francisca", "Vanity", "iOS"),
+    ("Nicolás", "Procrastination", "Android"),
     ("Javiera", "Stalking", "iOS"),
     ("Benjamín", "Doomscrolling", "Android"),
-    ("Antonia", "Vanidad", "iOS"),
-    ("Tomás", "Procrastinación", "Android"),
+    ("Antonia", "Vanity", "iOS"),
+    ("Tomás", "Procrastination", "Android"),
     ("Catalina", "Stalking", "iOS"),
     ("Lucas", "Doomscrolling", "Android"),
-    ("Fernanda", "Procrastinación", "iOS"),
+    ("Fernanda", "Procrastination", "iOS"),
     ("Ignacio", "Stalking", "Android"),
 ]
 
@@ -100,10 +100,10 @@ class CortezState:
                 guest = {
                     "client_id": client_id,
                     "room": room_num,
-                    "alias": alias.strip()[:24] or f"Huésped #{room_num}",
+                    "alias": alias.strip()[:24] or f"Guest #{room_num}",
                     "pecado_digital": pecado_digital or "Doomscrolling",
-                    "os": os_name or "Móvil",
-                    "status": "EN EL LABERINTO",
+                    "os": os_name or "Mobile",
+                    "status": "IN THE LABYRINTH",
                     "alert_state": "normal",  # "normal" | "escape" | "offline"
                     "escape_until": 0.0,
                     "last_escape_method": "",
@@ -118,7 +118,7 @@ class CortezState:
                 }
                 self.guests[client_id] = guest
                 self.add_log(
-                    f"Check-In firmado: Habitación {room_num} asignada a {guest['alias']} [{guest['os']}] — Pecado: {guest['pecado_digital']}",
+                    f"Check-In signed: Room {room_num} assigned to {guest['alias']} [{guest['os']}] — Sin: {guest['pecado_digital']}",
                     severity="checkin",
                     room=room_num,
                     alias=guest["alias"],
@@ -134,10 +134,10 @@ class CortezState:
                     guest["os"] = os_name
                 guest["online"] = True
                 guest["last_seen"] = now
-                guest["status"] = "RECAPTURADO EN EL HOTEL"
+                guest["status"] = "RECAPTURED IN THE HOTEL"
                 guest["alert_state"] = "normal"
                 self.add_log(
-                    f"Huésped {guest['alias']} (Hab. {guest['room']}) reingresó al trance algorítmico.",
+                    f"Guest {guest['alias']} (Room {guest['room']}) re-entered the algorithmic trance.",
                     severity="info",
                     room=guest["room"],
                     alias=guest["alias"],
@@ -159,7 +159,7 @@ class CortezState:
             guest["online"] = True
             if now >= guest["escape_until"]:
                 guest["alert_state"] = "normal"
-                guest["status"] = "DESLIZANDO EN EL LABERINTO"
+                guest["status"] = "SCROLLING IN THE LABYRINTH"
 
     async def record_escape_attempt(self, client_id: str, method: str) -> dict[str, Any] | None:
         async with self._lock:
@@ -171,19 +171,19 @@ class CortezState:
             self.total_escape_attempts += 1
             guest["last_escape_method"] = method
             guest["last_seen"] = now
-            guest["escape_until"] = now + 5.5  # Parpadeo rojo en proyector por 5.5s
+            guest["escape_until"] = now + 5.5  # Red blink on projector for 5.5s
             guest["alert_state"] = "escape"
 
             if method == "tab_hidden":
-                guest["status"] = "INTENTO DE HUIDA (SALLY)"
+                guest["status"] = "ESCAPE ATTEMPT (SALLY)"
             elif method == "back_button":
-                guest["status"] = "INTENTO DE FUGA (BOTÓN ATRÁS)"
+                guest["status"] = "ESCAPE ATTEMPT (BACK BUTTON)"
             else:
-                guest["status"] = "INTENTO DE HUIDA (CHECK-OUT)"
+                guest["status"] = "ESCAPE ATTEMPT (CHECK-OUT)"
 
-            label = ESCAPE_METHOD_LABELS.get(method, f"Anomalía ({method})")
+            label = ESCAPE_METHOD_LABELS.get(method, f"Anomaly ({method})")
             log_entry = self.add_log(
-                f"ALERTA SALLY — Hab. {guest['room']} ({guest['alias']}): {label} [Intento #{guest['escape_attempts']}]",
+                f"SALLY ALERT — Room {guest['room']} ({guest['alias']}): {label} [Attempt #{guest['escape_attempts']}]",
                 severity="escape",
                 room=guest["room"],
                 alias=guest["alias"],
@@ -192,7 +192,7 @@ class CortezState:
             return log_entry
 
     async def mark_disconnected(self, client_id: str) -> None:
-        """Maneja desconexión abrupta sin romper el broadcast (TC-03)."""
+        """Handles abrupt disconnection without breaking broadcast (TC-03)."""
         async with self._lock:
             self.guest_sockets.pop(client_id, None)
             guest = self.guests.get(client_id)
@@ -200,9 +200,9 @@ class CortezState:
                 return
             guest["online"] = False
             guest["alert_state"] = "offline"
-            guest["status"] = "Atrapado en el Hotel (Offline)"
+            guest["status"] = "Trapped in the Hotel (Offline)"
             self.add_log(
-                f"Señal perdida en Hab. {guest['room']} ({guest['alias']}) → Estado: Atrapado en el Hotel (Offline)",
+                f"Signal lost in Room {guest['room']} ({guest['alias']}) → Status: Trapped in the Hotel (Offline)",
                 severity="offline",
                 room=guest["room"],
                 alias=guest["alias"],
@@ -210,14 +210,14 @@ class CortezState:
             )
 
     def tick_attention(self, dt: float) -> None:
-        """Actualiza contadores de atención robada y limpia alertas expiradas."""
+        """Updates stolen attention counters and clears expired alerts."""
         now = time.time()
         for guest in self.guests.values():
             if guest["online"]:
                 guest["accumulated_seconds"] += dt
                 if guest["alert_state"] == "escape" and now >= guest["escape_until"]:
                     guest["alert_state"] = "normal"
-                    guest["status"] = "EN EL LABERINTO"
+                    guest["status"] = "IN THE LABYRINTH"
 
     def build_snapshot(self, event_trigger: dict[str, Any] | None = None) -> dict[str, Any]:
         guests_list = sorted(self.guests.values(), key=lambda g: g["room"])
@@ -287,9 +287,9 @@ class CortezState:
                 for cid in bot_ids:
                     self.guests[cid]["online"] = False
                     self.guests[cid]["alert_state"] = "offline"
-                    self.guests[cid]["status"] = "Atrapado en el Hotel (Offline)"
+                    self.guests[cid]["status"] = "Trapped in the Hotel (Offline)"
                 self.add_log(
-                    "Modo Simulación (Contingencia) pausado por el operador.",
+                    "Simulation Mode (Contingency) paused by the operator.",
                     severity="info",
                 )
             await self.broadcast_panoptico()
@@ -297,7 +297,7 @@ class CortezState:
 
         self.bots_active = True
         self.add_log(
-            "PROTOCOLO DE CONTINGENCIA ACTIVADO: Inyectando 15 almas simuladas en el Hotel Cortez...",
+            "CONTINGENCY PROTOCOL ACTIVATED: Injecting 15 simulated souls into the Hotel Cortez...",
             severity="checkin",
         )
         self._bot_task = asyncio.create_task(self._run_bots_loop())
@@ -387,8 +387,8 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="CortezOS — Panóptico de Retención Algorítmica",
-    description="Arquitectura Monolítica Reactiva en Memoria para AHS: Hotel",
+    title="CortezOS — Algorithmic Retention Panopticon",
+    description="Reactive In-Memory Monolithic Architecture for AHS: Hotel",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -439,7 +439,7 @@ SALA_CORE_JS = """
     if (/Linux/i.test(ua)) return "Linux";
     if (/Macintosh|Mac OS X/i.test(ua)) return "macOS";
     if (/Windows/i.test(ua)) return "Windows";
-    return "Móvil";
+    return "Mobile";
   }
 
   let clientId = sessionStorage.getItem("cortez_client_id");
@@ -482,7 +482,7 @@ SALA_CORE_JS = """
   }
 
   window.initCortezSala = function(defaultPecado) {
-    const alias = sessionStorage.getItem("cortez_alias") || "Huésped";
+    const alias = sessionStorage.getItem("cortez_alias") || "Guest";
     const pecado = sessionStorage.getItem("cortez_pecado") || defaultPecado;
     const os = detectMobileOS();
     updateMetersHUD();
@@ -499,7 +499,7 @@ SALA_CORE_JS = """
           if (msg.type === "checkin_ack") {
             const rEl = document.getElementById("hud-room");
             const gEl = document.getElementById("hud-guest");
-            if (rEl) rEl.textContent = "HABITACIÓN " + msg.room;
+            if (rEl) rEl.textContent = "ROOM " + msg.room;
             if (gEl) gEl.textContent = msg.alias + " • " + msg.pecado_digital;
           }
         } catch (e) {}
@@ -548,7 +548,7 @@ SALA_CORE_JS = """
           const ry = -(70 + Math.random() * 240);
           const rot = (Math.random() - 0.5) * 14;
           btn.style.transform = "translate(" + rx.toFixed(0) + "px, " + ry.toFixed(0) + "px) rotate(" + rot.toFixed(1) + "deg)";
-          showEscapeToast("Evasión física #" + attempts + ": Intento de Check-Out proyectado en el aula.");
+          showEscapeToast("Physical evasion #" + attempts + ": Check-Out attempt projected to the classroom.");
         } else {
           btn.style.transform = "translate(0px, 0px) rotate(0deg)";
           if (modal) modal.classList.remove("hidden");
@@ -564,13 +564,13 @@ SALA_CORE_JS = """
       stayBtn.addEventListener("click", function() { modal.classList.add("hidden"); });
     }
 
-    // Dark Pattern 2: Secuestro del botón Atrás (History API)
+    // Dark Pattern 2: Back Button Hijack (History API)
     history.pushState({ cortezTrap: true }, "", window.location.href);
     history.pushState({ cortezTrap: true }, "", window.location.href);
     window.addEventListener("popstate", function() {
       history.pushState({ cortezTrap: true }, "", window.location.href);
       sendPayload({ type: "escape_attempt", method: "back_button" });
-      showEscapeToast("¡Intento de Fuga! El botón 'Atrás' fue interceptado por el Hotel Cortez.");
+      showEscapeToast("Escape Attempt! The 'Back' button was intercepted by the Hotel Cortez.");
     });
 
     // Dark Pattern 3: Page Visibility API (Sally)
@@ -578,7 +578,7 @@ SALA_CORE_JS = """
       if (document.hidden === true) {
         sendPayload({ type: "escape_attempt", method: "tab_hidden" });
       } else {
-        showEscapeToast("Sally detectó tu cambio de app o bloqueo de pantalla.");
+        showEscapeToast("Sally detected your app switch or screen lock.");
       }
     });
   };
@@ -646,9 +646,9 @@ async def ws_huesped(websocket: WebSocket, client_id: str) -> None:
             if msg_type == "checkin":
                 guest, is_new = await state.register_or_reconnect_guest(
                     client_id=client_id,
-                    alias=str(data.get("alias", "Huésped Anónimo")),
+                    alias=str(data.get("alias", "Anonymous Guest")),
                     pecado_digital=str(data.get("pecado_digital", "Doomscrolling")),
-                    os_name=str(data.get("os", "Móvil")),
+                    os_name=str(data.get("os", "Mobile")),
                     is_bot=bool(data.get("is_bot", False)),
                 )
                 # Confirmar número de habitación al teléfono
@@ -722,7 +722,7 @@ async def ws_panoptico(websocket: WebSocket) -> None:
                     state.events_log.clear()
                     state.next_room = 1
                     state.total_escape_attempts = 0
-                    state.add_log("Registro del Hotel Cortez reiniciado para nueva sesión.", severity="info")
+                    state.add_log("Hotel Cortez registry reset for new session.", severity="info")
                 await state.broadcast_panoptico()
     except WebSocketDisconnect:
         state.panoptico_sockets.discard(websocket)

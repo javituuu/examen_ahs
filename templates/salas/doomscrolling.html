@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sala Doomscrolling — El Laberinto de March</title>
+  <title>Doomscrolling Room — March's Labyrinth</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
@@ -34,17 +34,17 @@
     </div>
   </div>
 
-  <!-- HUD Superior -->
+  <!-- Top HUD -->
   <header class="sticky top-0 z-30 bg-cortez-black/95 backdrop-blur-md border-b border-cortez-gold/50 px-4 py-3 flex items-center justify-between">
     <div>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">HABITACIÓN --</span>
+        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">ROOM --</span>
       </div>
-      <p id="hud-guest" class="text-xs text-amber-100/70">Ala: Doomscrolling (Mr. March)</p>
+      <p id="hud-guest" class="text-xs text-amber-100/70">Wing: Doomscrolling (Mr. March)</p>
     </div>
     <div class="text-right">
-      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Pasillos Deslizados</p>
+      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Hallways Scrolled</p>
       <p class="font-mono text-base font-bold text-amber-50"><span id="hud-meters">0.0</span> <span class="text-xs text-cortez-gold">m</span></p>
     </div>
   </header>
@@ -52,11 +52,11 @@
   <main class="px-4 pt-5 space-y-5">
     <div class="deco-border bg-cortez-charcoal p-5 text-center">
       <span class="px-2 py-0.5 text-[10px] font-mono uppercase bg-cortez-crimson text-amber-50 border border-cortez-gold/50">
-        Pecado Capital: Doomscrolling
+        Deadly Sin: Doomscrolling
       </span>
-      <h1 class="font-deco text-xl font-bold text-cortez-gold mt-2">EL PASILLO SIN FIN DE MARCH</h1>
+      <h1 class="font-deco text-xl font-bold text-cortez-gold mt-2">MARCH'S ENDLESS HALLWAY</h1>
       <p class="font-serif italic text-base text-amber-100/85 mt-1">
-        “Eliminamos los topes visuales para que tu cerebro nunca reciba la señal de saciedad. Desliza para buscar la salida.”
+        “We removed visual stopping cues so your brain never receives the fullness signal. Scroll to search for the exit.”
       </p>
     </div>
 
@@ -64,28 +64,28 @@
 
     <div class="py-6 text-center">
       <p class="font-deco text-xs tracking-[0.25em] text-cortez-gold/70 animate-pulse">
-        ❖ GENERANDO MÁS TITULARES Y PASILLOS... ❖
+        ❖ GENERATING MORE HEADLINES AND HALLWAYS... ❖
       </p>
     </div>
   </main>
 
-  <!-- Botón Evasivo -->
+  <!-- Evasive Button -->
   <div class="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none flex justify-center">
     <button id="checkout-btn" type="button" class="pointer-events-auto bg-cortez-crimson text-amber-50 border border-cortez-gold px-5 py-2.5 font-deco text-xs uppercase tracking-[0.2em] shadow-2xl">
-      🚪 Hacer Check-Out (Salir)
+      🚪 Check-Out (Exit)
     </button>
   </div>
 
-  <!-- Modal Psicológico (3er intento) -->
+  <!-- Psychological Modal (3rd attempt) -->
   <div id="psych-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-5">
     <div class="deco-border bg-cortez-charcoal max-w-sm w-full p-6 text-center space-y-4">
-      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Cláusula 64 • James Patrick March</p>
-      <h3 class="font-deco text-xl font-bold text-amber-50">EL PASILLO NO TIENE PUERTA</h3>
+      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Clause 64 • James Patrick March</p>
+      <h3 class="font-deco text-xl font-bold text-amber-50">THE HALLWAY HAS NO DOOR</h3>
       <p class="font-serif italic text-base text-amber-100/85">
-        “Tu intento de salida acaba de encender tu tarjeta en rojo frente a toda la clase en el Panóptico.”
+        “Your exit attempt just lit up your card in red in front of the entire class in the Panopticon.”
       </p>
       <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3">
-        Seguir Deslizando en el Laberinto
+        Keep Scrolling Through the Labyrinth
       </button>
     </div>
   </div>
@@ -93,10 +93,10 @@
   <script src="/cortez-sala-core.js"></script>
   <script>
     const DOOM_ITEMS = [
-      { tag: "URGENTE • PISO 5", title: "El 94% de los huéspedes cree que dejará de deslizar en el próximo bloque.", body: "Zuboff: La eliminación de 'stopping cues' convierte un impulso de 30 segundos en una sesión de 45 minutos." },
-      { tag: "ALERTA DE TELEMETRÍA", title: "El proyector central acaba de registrar la velocidad exacta de tu pulgar.", body: "Cada pixel recorrido alimenta la curva de extracción de dopamina en vivo frente al aula." },
-      { tag: "ARCHIVO 1926 • MR. MARCH", title: "“Diseñé escaleras que terminan en muros ciegos y puertas que abren hacia ladrillos.”", body: "Hoy no hacen falta ladrillos: basta con un feed infinito que se recarga al llegar al 80% de la pantalla." },
-      { tag: "ÚLTIMO MINUTO • HABITACIÓN 64", title: "Otro compañero de la sala acaba de intentar salir y fue interceptado por Sally.", body: "Presiona el botón de Check-Out abajo si crees que puedes escapar del diseño conductual." }
+      { tag: "URGENT • FLOOR 5", title: "94% of guests believe they will stop scrolling in the next block.", body: "Zuboff: Removing 'stopping cues' turns a 30-second impulse into a 45-minute session." },
+      { tag: "TELEMETRY ALERT", title: "The central projector just logged the exact speed of your thumb.", body: "Every pixel traveled feeds the live dopamine extraction curve in front of the classroom." },
+      { tag: "ARCHIVE 1926 • MR. MARCH", title: "“I designed staircases that end in blind walls and doors that open onto bricks.”", body: "Today no bricks are needed: all it takes is an infinite feed that reloads at 80% of the screen." },
+      { tag: "BREAKING • ROOM 64", title: "Another classmate in the room just tried to leave and was intercepted by Sally.", body: "Press the Check-Out button below if you think you can escape behavioral design." }
     ];
     let idx = 0;
     const feed = document.getElementById("corridor-feed");
@@ -110,7 +110,7 @@
         el.innerHTML = `
           <div class="flex justify-between text-[10px] font-mono text-red-400">
             <span>● ${item.tag}</span>
-            <span>TRAMO #${idx}</span>
+            <span>SEGMENT #${idx}</span>
           </div>
           <h3 class="font-deco text-sm font-bold text-cortez-gold">${item.title}</h3>
           <p class="text-xs text-amber-100/80 leading-relaxed">${item.body}</p>

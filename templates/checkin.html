@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -80,8 +80,8 @@
       <div class="flex items-center gap-3">
         <span class="text-xl">👁️</span>
         <div>
-          <p class="font-deco text-xs tracking-widest text-cortez-gold uppercase font-bold">Alerta del Panóptico</p>
-          <p id="escape-toast-msg" class="text-xs font-medium">Intento de fuga registrado. Los pasillos de March se han cerrado.</p>
+          <p class="font-deco text-xs tracking-widest text-cortez-gold uppercase font-bold">Panopticon Alert</p>
+          <p id="escape-toast-msg" class="text-xs font-medium">Escape attempt recorded. March's corridors have locked.</p>
         </div>
       </div>
       <span class="text-[10px] font-mono uppercase px-2 py-0.5 bg-black/50 border border-cortez-gold/50">REC</span>
@@ -92,9 +92,9 @@
   <main id="onboarding-view" class="min-h-screen flex flex-col justify-center px-5 py-10 max-w-md mx-auto">
     <div class="deco-border deco-corner bg-cortez-charcoal/95 p-6 sm:p-8 relative">
       <div class="text-center border-b border-cortez-gold/30 pb-5 mb-6">
-        <p class="text-[11px] font-deco tracking-[0.35em] text-cortez-gold/80 uppercase mb-1">Los Ángeles • Est. 1926</p>
+        <p class="text-[11px] font-deco tracking-[0.35em] text-cortez-gold/80 uppercase mb-1">Los Angeles • Est. 1926</p>
         <h1 class="font-deco text-3xl sm:text-4xl font-bold tracking-wider text-cortez-gold">HOTEL CORTEZ</h1>
-        <p class="font-serif italic text-base text-amber-100/80 mt-1">“Entras por curiosidad, te quedas por diseño.”</p>
+        <p class="font-serif italic text-base text-amber-100/80 mt-1">“You check in out of curiosity, you stay by design.”</p>
       </div>
 
       <form id="checkin-form" class="space-y-5">
@@ -107,7 +107,7 @@
             type="text"
             required
             maxlength="22"
-            placeholder="Ej. Diego, Sofía, Mr. March..."
+            placeholder="e.g. Diego, Sofia, Mr. March..."
             class="w-full bg-cortez-black border border-cortez-gold/60 focus:border-cortez-gold px-4 py-3 text-sm text-amber-50 placeholder-amber-200/30 outline-none transition"
           />
         </div>
@@ -121,16 +121,16 @@
             class="w-full bg-cortez-black border border-cortez-gold/60 focus:border-cortez-gold px-4 py-3 text-sm text-amber-50 outline-none transition"
           >
             <option value="Doomscrolling">Doomscrolling (The Infinite Maze)</option>
-            <option value="Vanidad">Pride (The Countess' Mirror)</option>
+            <option value="Vanity">Vanity (The Countess' Mirror)</option>
             <option value="Stalking">Stalking (March's Peepholes)</option>
-            <option value="Procrastinación">Procrastination (Sally's Needle)</option>
+            <option value="Procrastination">Procrastination (Sally's Needle)</option>
           </select>
         </div>
 
         <div class="bg-black/60 border border-cortez-gold/25 p-3 text-xs text-amber-100/70 space-y-1">
           <div class="flex justify-between">
-            <span class="uppercase tracking-wider text-cortez-gold/80 font-deco text-[10px]">Dispositivo Detectado:</span>
-            <span id="detected-os-badge" class="font-mono text-cortez-gold font-semibold">Detectando...</span>
+            <span class="uppercase tracking-wider text-cortez-gold/80 font-deco text-[10px]">Detected Device:</span>
+            <span id="detected-os-badge" class="font-mono text-cortez-gold font-semibold">Detecting...</span>
           </div>
           <p class="text-[11px] leading-relaxed text-amber-100/60 font-serif italic">
             By signing, you voluntarily cede your behavioural history (Zuboff) and your attention in real-time to the class' panopticon.
@@ -173,7 +173,7 @@
     <div class="px-4 pt-6 pb-2">
       <div class="deco-border bg-cortez-charcoal/90 p-5 text-center mb-6">
         <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Floor 5 • The Hallway with no Exit.</p>
-        <h2 class="font-deco text-xl text-cortez-gold font-bold mt-1">MARCH'S LABYRYNTH</h2>
+        <h2 class="font-deco text-xl text-cortez-gold font-bold mt-1">MARCH'S LABYRINTH</h2>
         <p class="font-serif italic text-base text-amber-100/85 mt-2 leading-relaxed">
           Scroll down to find the exit. Every centimeter that your thumb scrolls through feeds the Countess in the projector.
         </p>
@@ -211,7 +211,7 @@
       <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Clause NO. 64 • James Patrick March</p>
       <h3 class="font-deco text-xl font-bold text-amber-50">GIVING UP SO SOON?</h3>
       <p id="psych-modal-text" class="font-serif italic text-base text-amber-100/85 leading-relaxed">
-        “Under a capitallistic system so dependent on surveillance, you are not the client, instead, you are the PRODUCT. Your pathetic attempt at escape has just been shown to the whole class.”
+        “Under a capitalistic system so dependent on surveillance, you are not the client—you are the PRODUCT. Your pathetic escape attempt has just been projected to the whole class.”
       </p>
       <div class="bg-black/60 border border-cortez-crimson/60 p-3 text-xs font-mono text-red-300">
         PROJECTOR STATE: <span class="font-bold text-white">EXIT ATTEMPT DETECTED</span>
@@ -246,7 +246,7 @@
       if (/Linux/i.test(ua)) return "Linux";
       if (/Macintosh|Mac OS X/i.test(ua)) return "macOS";
       if (/Windows/i.test(ua)) return "Windows";
-      return "Móvil";
+      return "Mobile";
     }
 
     const detectedOS = detectMobileOS();
@@ -263,40 +263,40 @@
     // =========================================================================
     const CORRIDOR_STORIES = [
       {
-        floor: "HALLWAY NO. 64 • WINDOW-LESS ARCHITECTURE",
-        quote: "“I built this hotel so that no one would ever find the end of this corridor. Now, you all have the building in your pocket.”",
+        floor: "HALLWAY NO. 64 • WINDOWLESS ARCHITECTURE",
+        quote: "“I built this hotel so that no one would ever find the end of this corridor. Now, you all carry the building in your pocket.”",
         author: "James Patrick March",
-        theory: "Shoshana Zuboff: The infinite scroll delets the 'natural detection points' (stopping cues) para maximizar la extracción de excedente conductual."
+        theory: "Shoshana Zuboff: Infinite scroll deletes 'natural stopping cues' to maximize the extraction of behavioral surplus."
       },
       {
-        floor: "SUITE DE LA CONDESA • ELIXIR DE DOPAMINA",
-        quote: "“No me alimento de sangre por crueldad, sino porque su brillo me mantiene eterna. Cada notificación es una gota más.”",
-        author: "Elizabeth (La Condesa)",
-        theory: "Byung-Chul Han (Psicopolítica): El sujeto neoliberal no es sometido por prohibición, sino seducido a exponerse y entregarse voluntariamente."
+        floor: "THE COUNTESS' SUITE • DOPAMINE ELIXIR",
+        quote: "“I do not feed on blood out of cruelty, but because its glow keeps me eternal. Every notification is one more drop.”",
+        author: "Elizabeth (The Countess)",
+        theory: "Byung-Chul Han (Psychopolitics): The neoliberal subject is not subjugated by prohibition, but seduced into exposing and surrendering themselves voluntarily."
       },
       {
-        floor: "HABITACIÓN DE SALLY • SÍNDROME DE ABSTINENCIA",
-        quote: "“Cosí mi cuerpo al colchón de este cuarto para no volver a sentir el vacío de estar desconectada ni un solo segundo.”",
+        floor: "SALLY'S ROOM • WITHDRAWAL SYNDROME",
+        quote: "“I sewed my body to the mattress in this room so I would never feel the emptiness of being disconnected for even a single second.”",
         author: "Sally McKenna",
-        theory: "Recompensa Variable Intermitente (B.F. Skinner): Tu pulgar desliza buscando la próxima dosis impredecible de validación social."
+        theory: "Intermittent Variable Reward (B.F. Skinner): Your thumb swipes searching for the next unpredictable dose of social validation."
       },
       {
-        floor: "RECEPCIÓN DE IRIS • EL LIBRO DE REGISTRO",
-        quote: "“Todos creen que entran solo por cinco minutos a mirar. Llevan años caminando en círculos sobre la misma alfombra geométrica.”",
-        author: "Iris (Conserjería)",
-        theory: "Dark Patterns (Brignull): Obstaculización deliberada de la salida (Roach Motel) donde hacer Check-In toma 1 segundo y salir es un laberinto."
+        floor: "IRIS' FRONT DESK • THE GUEST LEDGER",
+        quote: "“Everyone thinks they are only stepping in for five minutes to look. They have been walking in circles on the same geometric carpet for years.”",
+        author: "Iris (Concierge)",
+        theory: "Dark Patterns (Brignull): Deliberate obstruction of exit (Roach Motel), where checking in takes 1 second and leaving is a labyrinth."
       },
       {
-        floor: " CONDUCTO DE VENTILACIÓN • TELEMETRÍA EN VIVO",
-        quote: "“Detrás de cada espejo Art Déco hay una galería desde donde observamos cada titubeo de tu dedo.”",
-        author: "Archivos de CortezOS",
-        theory: "Panóptico Digital: A diferencia del panóptico de Bentham, aquí los prisioneros compiten por decorar su propia celda en el feed."
+        floor: "AIR DUCT • LIVE TELEMETRY",
+        quote: "“Behind every Art Deco mirror there is a gallery from which we observe every hesitation of your finger.”",
+        author: "CortezOS Archives",
+        theory: "Digital Panopticon: Unlike Bentham's panopticon, here prisoners compete to decorate their own cell in the feed."
       },
       {
-        floor: "EL ASCENSOR SIN BOTÓN DE PLANTA BAJA",
-        quote: "“¿Buscabas la puerta a la calle? Acabas de pasar frente a la Habitación 64 por cuarta vez consecutiva.”",
-        author: "El Botones del Cortez",
-        theory: "Economía de la Atención: Tu tiempo de vida medido en píxeles está siendo graficado ahora mismo en el proyector frente a la clase."
+        floor: "THE ELEVATOR WITH NO LOBBY BUTTON",
+        quote: "“Were you looking for the street exit? You just walked past Room 64 for the fourth time in a row.”",
+        author: "The Cortez Bellhop",
+        theory: "Attention Economy: Your lifetime measured in pixels is being graphed right now on the projector in front of the class."
       }
     ];
 
@@ -314,14 +314,14 @@
         article.innerHTML = `
           <div class="flex items-center justify-between border-b border-cortez-gold/25 pb-2">
             <span class="font-deco text-[10px] tracking-[0.2em] text-cortez-gold uppercase">${item.floor}</span>
-            <span class="font-mono text-[10px] text-amber-200/50">Tramo #${corridorIndex} (${meterMark}m)</span>
+            <span class="font-mono text-[10px] text-amber-200/50">Segment #${corridorIndex} (${meterMark}m)</span>
           </div>
           <blockquote class="font-serif italic text-lg text-amber-50 leading-snug">
             ${item.quote}
           </blockquote>
           <p class="text-right font-deco text-[11px] text-cortez-gold/90">— ${item.author}</p>
           <div class="bg-black/55 border-l-2 border-cortez-crimson p-3 text-xs text-amber-100/75 leading-relaxed">
-            <span class="font-deco text-[10px] uppercase tracking-wider text-red-400 block mb-0.5">Lectura Crítica:</span>
+            <span class="font-deco text-[10px] uppercase tracking-wider text-red-400 block mb-0.5">Critical Reading:</span>
             ${item.theory}
           </div>
         `;
@@ -359,7 +359,7 @@
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === "checkin_ack") {
-            document.getElementById("hud-room").textContent = `HABITACIÓN ${msg.room}`;
+            document.getElementById("hud-room").textContent = `ROOM ${msg.room}`;
             document.getElementById("hud-guest").textContent = `${msg.alias} • ${msg.pecado_digital}`;
           }
         } catch (err) {
@@ -393,7 +393,7 @@
     // =========================================================================
     document.getElementById("checkin-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      const aliasVal = document.getElementById("alias-input").value.trim() || "Huésped Anónimo";
+      const aliasVal = document.getElementById("alias-input").value.trim() || "Anonymous Guest";
       const pecadoVal = document.getElementById("pecado-select").value;
 
       guestProfile = { alias: aliasVal, pecado_digital: pecadoVal, os: detectedOS };
@@ -482,16 +482,16 @@
 
         checkoutBtn.style.transform = `translate(${randX.toFixed(0)}px, ${randY.toFixed(0)}px) rotate(${randRot.toFixed(1)}deg)`;
         checkoutBtn.textContent = checkoutAttempts === 1
-          ? "🚪 ¿Seguro quieres salir? (Intenta de nuevo)"
-          : "🗝️ La cerradura se movió...";
+          ? "🚪 Are you sure you want to leave? (Try again)"
+          : "🗝️ The lock moved...";
 
-        showEscapeToast(`Evasión física #${checkoutAttempts}: Tu intento de Check-Out fue reportado al Panóptico.`);
+        showEscapeToast(`Physical evasion #${checkoutAttempts}: Your Check-Out attempt was reported to the Panopticon.`);
       } else {
-        // 3er intento: regresa a su sitio y abre el modal psicológico falso
+        // 3rd attempt: returns to its place and opens the fake psychological modal
         checkoutBtn.style.transform = "translate(0px, 0px) rotate(0deg)";
-        checkoutBtn.textContent = "🚪 Hacer Check-Out (Salir)";
+        checkoutBtn.textContent = "🚪 Check-Out (Exit)";
         psychModal.classList.remove("hidden");
-        checkoutAttempts = 0; // Reinicia el ciclo si cierra el modal
+        checkoutAttempts = 0; // Resets cycle if modal is closed
       }
     }
 
@@ -507,13 +507,13 @@
     document.getElementById("fake-leave-btn").addEventListener("click", () => {
       sendPayload({ type: "escape_attempt", method: "button_click" });
       document.getElementById("psych-modal-text").textContent =
-        "“Error 64: La puerta principal ha sido reemplazada por un muro de ladrillos por orden de Mr. March. Sigue deslizando.”";
+        "“Error 64: The front door has been replaced with a brick wall by order of Mr. March. Keep scrolling.”";
       setTimeout(() => {
         psychModal.classList.add("hidden");
       }, 1800);
     });
 
-    // Secuestro del botón "Atrás" (History API Hijacking)
+    // Back button hijacking (History API Hijacking)
     function armBackButtonTrap() {
       history.pushState({ cortezTrap: true }, "", window.location.href);
       history.pushState({ cortezTrap: true }, "", window.location.href);
@@ -523,16 +523,16 @@
       if (!isCheckedIn) return;
       history.pushState({ cortezTrap: true }, "", window.location.href);
       sendPayload({ type: "escape_attempt", method: "back_button" });
-      showEscapeToast("¡Intento de Fuga! El gesto 'Atrás' fue interceptado por el Hotel Cortez.");
+      showEscapeToast("Escape Attempt! The 'Back' gesture was intercepted by the Hotel Cortez.");
     });
 
-    // Detección de Deserción (Page Visibility API — Síndrome de Abstinencia de Sally)
+    // Desertion detection (Page Visibility API — Sally's Withdrawal Syndrome)
     document.addEventListener("visibilitychange", () => {
       if (!isCheckedIn) return;
       if (document.hidden === true) {
         sendPayload({ type: "escape_attempt", method: "tab_hidden" });
       } else {
-        showEscapeToast("Sally te vio cambiar de app o bloquear la pantalla. El proyector registró tu deserción.");
+        showEscapeToast("Sally saw you switch apps or lock your screen. The projector logged your desertion.");
       }
     });
   </script>

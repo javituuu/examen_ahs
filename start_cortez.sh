@@ -8,16 +8,16 @@ TUNNEL_LOG=".cortez_tunnel.log"
 rm -f "$TUNNEL_LOG"
 
 echo "================================================================"
-echo "  HOTEL CORTEZ (CortezOS) — Inicializando Servidor y Túnel"
+echo "  HOTEL CORTEZ (CortezOS) — Initializing Server and Tunnel"
 echo "================================================================"
 
-# 1. Levantar Uvicorn en segundo plano
+# 1. Start Uvicorn in background
 ./.venv/bin/uvicorn app:app --host 0.0.0.0 --port "$PORT" --log-level warning &
 UVICORN_PID=$!
 
 cleanup() {
   echo ""
-  echo "[CortezOS] Cerrando puertas del Hotel Cortez..."
+  echo "[CortezOS] Closing the doors of Hotel Cortez..."
   kill "$UVICORN_PID" 2>/dev/null || true
   if [ -n "${CLOUDFLARED_PID:-}" ]; then
     kill "$CLOUDFLARED_PID" 2>/dev/null || true
@@ -26,14 +26,14 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 sleep 1.2
-echo "[OK] Servidor FastAPI activo en:"
-echo "     • Proyector Local: http://localhost:${PORT}/panoptico"
-echo "     • Check-In Local:  http://localhost:${PORT}/checkin"
+echo "[OK] FastAPI server active at:"
+echo "     • Local Projector: http://localhost:${PORT}/panoptico"
+echo "     • Local Check-In:  http://localhost:${PORT}/checkin"
 
-# 2. Verificar e iniciar Cloudflare Quick Tunnel (Zero-Config, sin cuenta)
+# 2. Verify and start Cloudflare Quick Tunnel (Zero-Config, no account)
 if command -v cloudflared >/dev/null 2>&1; then
   echo ""
-  echo "[Cloudflare] Abriendo Quick Tunnel HTTPS/WSS hacia localhost:${PORT}..."
+  echo "[Cloudflare] Opening Quick Tunnel HTTPS/WSS to localhost:${PORT}..."
   cloudflared tunnel --url "http://localhost:${PORT}" --no-autoupdate > "$TUNNEL_LOG" 2>&1 &
   CLOUDFLARED_PID=$!
 
@@ -48,22 +48,22 @@ if command -v cloudflared >/dev/null 2>&1; then
 
   if [ -n "$PUBLIC_URL" ]; then
     echo "================================================================"
-    echo "  🌐 TÚNEL PÚBLICO ACTIVO (4G / 5G / Wi-Fi):"
-    echo "  • Proyector (abre este link para que el QR sea público):"
+    echo "  🌐 PUBLIC TUNNEL ACTIVE (4G / 5G / Wi-Fi):"
+    echo "  • Projector (open this link so the QR points to public URL):"
     echo "    ${PUBLIC_URL}/panoptico"
     echo ""
-    echo "  • Link directo para celulares de la clase:"
+    echo "  • Direct link for classroom phones:"
     echo "    ${PUBLIC_URL}/checkin"
     echo "================================================================"
   else
-    echo "[Aviso] cloudflared sigue negociando la URL. Revisa $TUNNEL_LOG"
+    echo "[Notice] cloudflared is still negotiating the URL. Check $TUNNEL_LOG"
   fi
 else
   echo ""
-  echo "[Aviso] No se encontró 'cloudflared' en el PATH."
-  echo "        En Arch Linux instálalo con: sudo pacman -S cloudflared"
+  echo "[Notice] 'cloudflared' was not found in PATH."
+  echo "         On Arch Linux install it with: sudo pacman -S cloudflared"
 fi
 
 echo ""
-echo "Presiona Ctrl+C para detener CortezOS."
+echo "Press Ctrl+C to stop CortezOS."
 wait "$UVICORN_PID"

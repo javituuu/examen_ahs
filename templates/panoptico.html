@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CortezOS — El Panóptico de Retención Algorítmica</title>
+  <title>CortezOS — The Algorithmic Retention Panopticon</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -88,30 +88,30 @@
       <div>
         <div class="flex items-center gap-3">
           <h1 class="font-deco text-2xl lg:text-3xl font-black tracking-[0.18em] text-cortez-gold">
-            CORTEZ<span class="text-amber-100">OS</span> • EL PANÓPTICO
+            CORTEZ<span class="text-amber-100">OS</span> • THE PANOPTICON
           </h1>
           <span id="ws-status-pill" class="px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50">
-            ● EN VIVO (10Hz)
+            ● LIVE (10Hz)
           </span>
           <span id="bot-status-pill" class="hidden px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-amber-950/90 text-cortez-gold border border-cortez-gold/60">
-            ⚡ SIMULACIÓN ACTIVA (15 BOTS)
+            ⚡ SIMULATION ACTIVE (15 BOTS)
           </span>
         </div>
         <p class="text-xs text-amber-100/70 tracking-wide">
-          Telemetría de Retención Algorítmica y Patrones Oscuros • <span class="text-cortez-gold font-semibold">American Horror Story: Hotel</span>
+          Algorithmic Retention &amp; Dark Patterns Telemetry • <span class="text-cortez-gold font-semibold">American Horror Story: Hotel</span>
         </p>
       </div>
     </div>
 
-    <!-- Controles de Recepción (Audio, QR, Bots) -->
+    <!-- Reception Controls (Audio, QR, Bots) -->
     <div class="flex items-center gap-2.5">
       <button
         id="audio-toggle-btn"
         type="button"
         class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-gold/70 bg-cortez-black hover:bg-cortez-gold hover:text-cortez-black transition cursor-pointer"
-        title="Activar/Silenciar Campanilla de Recepción (Web Audio API)"
+        title="Mute/Unmute Reception Bell (Web Audio API)"
       >
-        🔔 Timbre: <span id="audio-state-label">ACTIVO</span>
+        🔔 Bell: <span id="audio-state-label">ACTIVE</span>
       </button>
 
       <button
@@ -129,7 +129,7 @@
         class="px-3.5 py-2 text-xs font-deco uppercase tracking-widest border border-cortez-crimson bg-cortez-crimson/30 hover:bg-cortez-crimson text-amber-100 transition cursor-pointer"
         title="Turn On/Off 15 Simulated Guests (Keys B or S)"
       >
-        🤖 Contingencia [B]
+        🤖 Contingency [B]
       </button>
     </div>
   </header>
@@ -140,39 +140,39 @@
     <!-- COLUMNA IZQUIERDA/CENTRAL (8 COLS): CONTADORES TEÓRICOS + MATRIZ DE HABITACIONES -->
     <section class="xl:col-span-8 flex flex-col gap-5">
 
-      <!-- 3 CONTADORES GLOBALES TEÓRICOS -->
+      <!-- 3 GLOBAL THEORETICAL COUNTERS -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- 1. Índice La Condesa -->
+        <!-- 1. The Countess Index -->
         <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden">
           <div class="flex items-center justify-between">
-            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">Índice La Condesa</span>
-            <span class="text-xs font-mono text-amber-200/50">ZUBOFF / ATENCIÓN</span>
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">The Countess Index</span>
+            <span class="text-xs font-mono text-amber-200/50">ZUBOFF / ATTENTION</span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
             <span id="metric-condesa" class="font-mono text-4xl lg:text-5xl font-bold text-amber-50">0</span>
-            <span class="font-deco text-sm text-cortez-gold uppercase">seg robados</span>
+            <span class="font-deco text-sm text-cortez-gold uppercase">stolen sec</span>
           </div>
           <p class="mt-1.5 text-xs text-amber-100/65">
-            Tiempo vital acumulado extraído de los teléfonos conectados en la sala.
+            Accumulated vital time extracted from phones connected in the room.
           </p>
         </div>
 
-        <!-- 2. Pasillos de March -->
+        <!-- 2. March's Hallways -->
         <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden">
           <div class="flex items-center justify-between">
-            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">Pasillos de March</span>
-            <span class="text-xs font-mono text-amber-200/50">SCROLL INFINITO</span>
+            <span class="font-deco text-xs uppercase tracking-[0.2em] text-cortez-gold">March's Hallways</span>
+            <span class="text-xs font-mono text-amber-200/50">INFINITE SCROLL</span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
             <span id="metric-march" class="font-mono text-4xl lg:text-5xl font-bold text-cortez-gold">0.0</span>
-            <span class="font-deco text-sm text-amber-100 uppercase">metros</span>
+            <span class="font-deco text-sm text-amber-100 uppercase">meters</span>
           </div>
           <p class="mt-1.5 text-xs text-amber-100/65">
-            Total distance scrolled (<span id="metric-pixels" class="font-mono text-amber-100">0</span> px totales).
+            Total distance scrolled (<span id="metric-pixels" class="font-mono text-amber-100">0</span> total px).
           </p>
         </div>
 
-        <!-- 3. Síndrome de Sally (Intentos de Fuga) -->
+        <!-- 3. Sally's Syndrome (Escape Attempts) -->
         <div class="deco-frame bg-cortez-panel p-4 relative overflow-hidden border-cortez-crimson/80">
           <div class="flex items-center justify-between">
             <span class="font-deco text-xs uppercase tracking-[0.2em] text-red-400">Sally's Alerts</span>
@@ -183,17 +183,17 @@
             <span class="font-deco text-sm text-red-200 uppercase">Escape Attempts</span>
           </div>
           <p class="mt-1.5 text-xs text-amber-100/65">
-            Pressing the button, gestos "Atrás" y bloqueos de pantalla interceptados.
+            Button presses, "Back" gestures, and screen locks intercepted.
           </p>
         </div>
       </div>
 
-      <!-- MATRIZ DE HABITACIONES (GRILLA EN VIVO) -->
+      <!-- ROOMS MATRIX (LIVE GRID) -->
       <div class="deco-frame bg-cortez-panel/90 p-5 flex-1 flex flex-col min-h-[420px]">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cortez-gold/30 pb-3 mb-4">
           <div class="flex items-center gap-3">
             <h2 class="font-deco text-lg lg:text-xl font-bold tracking-[0.15em] text-cortez-gold uppercase">
-              Cortex Hotel Rooms Matrix
+              Cortez Hotel Rooms Matrix
             </h2>
             <span class="text-xs font-mono px-2.5 py-0.5 bg-black/60 border border-cortez-gold/40 text-amber-100">
               Guests: <strong id="guests-online-count" class="text-cortez-gold">0</strong> online / <span id="guests-total-count">0</span> registered
@@ -272,7 +272,7 @@
   <!-- MODAL DE CÓDIGO QR PARA LA CLASE -->
   <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
     <div class="deco-frame bg-cortez-panel max-w-md w-full p-7 text-center space-y-5">
-      <p class="font-deco text-xs tracking-[0.3em] text-cortez-gold uppercase">Reception of the Cortex Hotel</p>
+      <p class="font-deco text-xs tracking-[0.3em] text-cortez-gold uppercase">Cortez Hotel Reception</p>
       <h3 class="font-deco text-2xl font-bold text-amber-50">SCAN TO CHECK-IN</h3>
       <div class="bg-white p-5 inline-block mx-auto border-4 border-cortez-gold shadow-2xl">
         <div id="qrcode-canvas"></div>
@@ -337,7 +337,7 @@
           osc.stop(now + 1.4);
         });
       } catch (e) {
-        console.warn("Web Audio API pendiente de interacción:", e);
+        console.warn("Web Audio API awaiting user interaction:", e);
       }
     }
 
@@ -369,7 +369,7 @@
     document.getElementById("audio-toggle-btn").addEventListener("click", () => {
       ensureAudioContext();
       audioEnabled = !audioEnabled;
-      document.getElementById("audio-state-label").textContent = audioEnabled ? "ACTIVO" : "MUTE";
+      document.getElementById("audio-state-label").textContent = audioEnabled ? "ACTIVE" : "MUTED";
       if (audioEnabled) playReceptionBell();
     });
 
@@ -385,7 +385,7 @@
       labels: [],
       datasets: [
         {
-          label: "Pasillos de March (m)",
+          label: "March's Hallways (m)",
           data: [],
           borderColor: "#D4AF37",
           backgroundColor: "rgba(212, 175, 55, 0.15)",
@@ -396,7 +396,7 @@
           yAxisID: "y"
         },
         {
-          label: "Intentos de Fuga (Sally)",
+          label: "Escape Attempts (Sally)",
           data: [],
           borderColor: "#FF2E4C",
           backgroundColor: "rgba(255, 46, 76, 0.15)",
@@ -452,7 +452,7 @@
 
     // Actualizar la gráfica cada 1 segundo para mantener lectura fluida en proyector
     setInterval(() => {
-      const nowLabel = new Date().toLocaleTimeString("es-CL", { hour12: false });
+      const nowLabel = new Date().toLocaleTimeString("en-US", { hour12: false });
       chartData.labels.push(nowLabel);
       chartData.datasets[0].data.push(latestMetrics.pasillos_march_meters);
       chartData.datasets[1].data.push(latestMetrics.total_escape_attempts);
@@ -485,10 +485,10 @@
       const m = snapshot.metrics;
       latestMetrics = m;
 
-      // 1. Contadores superiores
-      document.getElementById("metric-condesa").textContent = m.indice_condesa_seconds.toLocaleString("es-CL");
+      // 1. Top counters
+      document.getElementById("metric-condesa").textContent = m.indice_condesa_seconds.toLocaleString("en-US");
       document.getElementById("metric-march").textContent = m.pasillos_march_meters.toFixed(1);
-      document.getElementById("metric-pixels").textContent = m.total_pixels.toLocaleString("es-CL");
+      document.getElementById("metric-pixels").textContent = m.total_pixels.toLocaleString("en-US");
       document.getElementById("metric-sally").textContent = m.total_escape_attempts;
 
       document.getElementById("guests-online-count").textContent = m.online_guests;
@@ -544,7 +544,7 @@
 
           card.className = `p-3.5 transition-all duration-200 flex flex-col justify-between ${stateClass}`;
 
-          const roomLabel = g.room === 1 ? "HABITACIÓN 1 (SUITE 64)" : `HABITACIÓN ${g.room}`;
+          const roomLabel = g.room === 1 ? "ROOM 1 (SUITE 64)" : `ROOM ${g.room}`;
           card.innerHTML = `
             <div>
               <div class="flex items-center justify-between gap-1 border-b border-cortez-gold/25 pb-1.5 mb-2">
@@ -561,8 +561,8 @@
 
             <div class="mt-3 pt-2 border-t border-white/10 space-y-1.5">
               <div class="flex justify-between text-xs font-mono">
-                <span class="text-amber-100/60">Pasillo: <strong class="text-amber-50">${g.meters.toFixed(1)}m</strong></span>
-                <span class="text-amber-100/60">Fugas: <strong class="${g.escape_attempts > 0 ? 'text-red-300' : 'text-amber-50'}">${g.escape_attempts}</strong></span>
+                <span class="text-amber-100/60">Hallway: <strong class="text-amber-50">${g.meters.toFixed(1)}m</strong></span>
+                <span class="text-amber-100/60">Escapes: <strong class="${g.escape_attempts > 0 ? 'text-red-300' : 'text-amber-50'}">${g.escape_attempts}</strong></span>
               </div>
               <div class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 border text-center truncate ${statusBadgeClass}">
                 ${escapeHtml(g.status)}
@@ -621,7 +621,7 @@
       const pill = document.getElementById("ws-status-pill");
 
       panopticoWs.onopen = () => {
-        pill.textContent = "● EN VIVO (10Hz)";
+        pill.textContent = "● LIVE (10Hz)";
         pill.className = "px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50";
       };
 
@@ -632,12 +632,12 @@
             renderSnapshot(snapshot);
           }
         } catch (err) {
-          console.error("Error procesando snapshot:", err);
+          console.error("Error processing snapshot:", err);
         }
       };
 
       panopticoWs.onclose = () => {
-        pill.textContent = "○ RECONECTANDO...";
+        pill.textContent = "○ RECONNECTING...";
         pill.className = "px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider bg-red-950/90 text-red-300 border border-red-500/50";
         setTimeout(connectPanopticoWS, 1500);
       };
@@ -662,19 +662,19 @@
       }
       const names = [
         ["Diego", "Doomscrolling", "Android"],
-        ["Valentina", "Vanidad", "iOS"],
-        ["Matías", "Procrastinación", "Android"],
+        ["Valentina", "Vanity", "iOS"],
+        ["Matías", "Procrastination", "Android"],
         ["Camila", "Stalking", "iOS"],
         ["Sebastián", "Doomscrolling", "Android"],
-        ["Francisca", "Vanidad", "iOS"],
-        ["Nicolás", "Procrastinación", "Android"],
+        ["Francisca", "Vanity", "iOS"],
+        ["Nicolás", "Procrastination", "Android"],
         ["Javiera", "Stalking", "iOS"],
         ["Benjamín", "Doomscrolling", "Android"],
-        ["Antonia", "Vanidad", "iOS"],
-        ["Tomás", "Procrastinación", "Android"],
+        ["Antonia", "Vanity", "iOS"],
+        ["Tomás", "Procrastination", "Android"],
         ["Catalina", "Stalking", "iOS"],
         ["Lucas", "Doomscrolling", "Android"],
-        ["Fernanda", "Procrastinación", "iOS"],
+        ["Fernanda", "Procrastination", "iOS"],
         ["Ignacio", "Stalking", "Android"]
       ];
       localBotsState = {
@@ -688,7 +688,7 @@
           alias: n[0],
           pecado_digital: n[1],
           os: n[2],
-          status: "EN EL LABERINTO",
+          status: "IN THE LABYRINTH",
           alert_state: "normal",
           pixels: 0,
           meters: 0,
@@ -706,19 +706,19 @@
           g.pixels += px;
           g.meters = +(g.pixels / 280).toFixed(2);
           g.alert_state = "normal";
-          g.status = "DESLIZANDO EN EL LABERINTO";
+          g.status = "SCROLLING IN THE LABYRINTH";
         });
         if (Math.random() < 0.35) {
           const target = localBotsState.guests[Math.floor(Math.random() * localBotsState.guests.length)];
           target.escape_attempts += 1;
           target.alert_state = "escape";
-          target.status = "INTENTO DE HUIDA (SALLY)";
+          target.status = "ESCAPE ATTEMPT (SALLY)";
           localBotsState.total_escape_attempts += 1;
           trigger = { kind: "escape_attempt" };
           localBotsState.logs.unshift({
             id: "l-" + Date.now() + Math.random(),
-            time: new Date().toLocaleTimeString("es-CL", { hour12: false }),
-            message: `ALERTA SALLY — Hab. ${target.room} (${target.alias}): Síndrome de Abstinencia detectado`,
+            time: new Date().toLocaleTimeString("en-US", { hour12: false }),
+            message: `SALLY ALERT — Room ${target.room} (${target.alias}): Withdrawal Syndrome detected`,
             severity: "escape"
           });
         }
@@ -749,7 +749,7 @@
     // 5. ATAJOS DE TECLADO (TECLA 'B' Y 'S' PARA BOTS, 'Q' PARA QR) + GENERADOR QR
     // =========================================================================
     const checkinUrl = `${window.location.origin}/checkin`;
-    document.getElementById("checkin-url-banner").textContent = `URL de acceso: ${checkinUrl}`;
+    document.getElementById("checkin-url-banner").textContent = `Access URL: ${checkinUrl}`;
     document.getElementById("qr-url-text").textContent = checkinUrl;
 
     let qrRendered = false;
