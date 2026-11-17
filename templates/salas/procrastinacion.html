@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sala Procrastinación — La Aguja de Sally</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0D0D0D" />
+  <title>Procrastination Wing — Sally's Needle</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
@@ -19,14 +22,21 @@
     }
   </script>
   <style>
-    body { background-color: #0D0D0D; color: #F3EAD6; overflow-x: hidden; }
+    html, body { background-color: #0D0D0D; color: #F3EAD6; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
     .deco-border { border: 1px solid #D4AF37; box-shadow: 0 0 18px rgba(212, 175, 55, 0.14); }
-    #checkout-btn { transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); touch-action: manipulation; }
+    button { -webkit-tap-highlight-color: transparent; }
+    #checkout-btn {
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
   </style>
 </head>
-<body class="min-h-screen font-sans pb-36 max-w-md mx-auto">
+<body class="min-h-[100dvh] font-sans pb-36 max-w-md mx-auto">
 
-  <!-- Toast de Alerta -->
+  <!-- Alert Toast -->
   <div id="escape-toast" class="fixed top-3 inset-x-3 z-50 hidden">
     <div class="bg-cortez-crimson border-2 border-cortez-gold text-white px-4 py-3 shadow-2xl flex items-center justify-between">
       <p id="escape-toast-msg" class="text-xs font-medium"></p>
@@ -34,17 +44,17 @@
     </div>
   </div>
 
-  <!-- HUD Superior -->
+  <!-- Top HUD -->
   <header class="sticky top-0 z-30 bg-cortez-black/95 backdrop-blur-md border-b border-cortez-gold/50 px-4 py-3 flex items-center justify-between">
     <div>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">HABITACIÓN --</span>
+        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">ROOM --</span>
       </div>
-      <p id="hud-guest" class="text-xs text-amber-100/70">Suite: Procrastinación (Sally)</p>
+      <p id="hud-guest" class="text-xs text-amber-100/70">Suite: Procrastination (Sally)</p>
     </div>
     <div class="text-right">
-      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Tiempo / Pasillo</p>
+      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Time / Hallway</p>
       <p class="font-mono text-base font-bold text-amber-50"><span id="hud-meters">0.0</span> <span class="text-xs text-cortez-gold">m</span></p>
     </div>
   </header>
@@ -52,22 +62,22 @@
   <main class="px-4 pt-5 space-y-5">
     <div class="deco-border bg-cortez-charcoal p-5 text-center space-y-4">
       <span class="px-2 py-0.5 text-[10px] font-mono uppercase bg-amber-950 text-cortez-gold border border-cortez-gold/50">
-        Pecado Capital: Procrastinación • Costo Hundido
+        Deadly Sin: Procrastination • Sunk Cost
       </span>
-      <h1 class="font-deco text-xl font-bold text-cortez-gold">LA AGUJA DE SALLY</h1>
+      <h1 class="font-deco text-xl font-bold text-cortez-gold">SALLY'S NEEDLE</h1>
       <p class="font-serif italic text-base text-amber-100/85">
-        “Solo 5 minutos más antes de volver a estudiar... Mira el contador: estás a punto de desbloquear la salida.”
+        “Just 5 more minutes before going back to work... Watch the timer: you're about to unlock the exit.”
       </p>
 
-      <!-- Trampa de cuenta regresiva que nunca llega a 0 -->
+      <!-- Countdown Trap that never reaches 0 -->
       <div class="bg-black/75 border border-cortez-gold/40 p-4 space-y-2">
-        <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold">Desbloqueando Puerta Principal (99%)</p>
+        <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold">Unlocking Main Door (99%)</p>
         <p id="countdown-timer" class="font-mono text-3xl font-bold text-amber-50">00:12</p>
         <div class="w-full h-2.5 bg-zinc-900 border border-cortez-gold/30">
           <div id="fake-progress" class="h-full bg-cortez-gold transition-all duration-300" style="width: 92%"></div>
         </div>
         <p id="reset-reason" class="text-[11px] text-amber-200/70 italic">
-          Si deslizas o tocas el botón de abajo, el algoritmo te regala "5 minutos más" de descanso.
+          If you scroll or tap the button below, the algorithm grants you "5 more minutes" of break time.
         </p>
       </div>
 
@@ -76,31 +86,36 @@
         type="button"
         class="w-full bg-cortez-gold hover:bg-amber-400 active:scale-95 text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.18em] py-3.5 transition cursor-pointer"
       >
-        ⏳ Postergar 5 Minutos Más (Autoplay)
+        ⏳ Snooze 5 More Minutes (Autoplay)
       </button>
     </div>
 
     <div id="corridor-feed" class="space-y-4"></div>
   </main>
 
-  <!-- Botón Evasivo -->
-  <div class="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none flex justify-center">
+  <!-- Evasive Check-Out Button -->
+  <div class="fixed inset-x-0 z-40 px-4 pointer-events-none flex justify-center" style="bottom: max(1rem, env(safe-area-inset-bottom));">
     <button id="checkout-btn" type="button" class="pointer-events-auto bg-cortez-crimson text-amber-50 border border-cortez-gold px-5 py-2.5 font-deco text-xs uppercase tracking-[0.2em] shadow-2xl">
-      🚪 Hacer Check-Out (Salir)
+      🚪 Check-Out (Exit)
     </button>
   </div>
 
-  <!-- Modal Psicológico -->
+  <!-- Psychological Trap Modal -->
   <div id="psych-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-5">
     <div class="deco-border bg-cortez-charcoal max-w-sm w-full p-6 text-center space-y-4">
-      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Habitación de Sally McKenna</p>
-      <h3 class="font-deco text-xl font-bold text-amber-50">COSIDO AL COLCHÓN</h3>
-      <p class="font-serif italic text-base text-amber-100/85">
-        “El 'Siguiente episodio en 5 segundos' está diseñado para vencer tu corteza prefrontal antes de que decidas apagar la pantalla.”
+      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Sally McKenna's Room</p>
+      <h3 class="font-deco text-xl font-bold text-amber-50">SEWN INTO THE MATTRESS</h3>
+      <p id="psych-modal-text" class="font-serif italic text-base text-amber-100/85">
+        “‘Next episode in 5 seconds’ is engineered to overpower your prefrontal cortex before you decide to lock your screen.”
       </p>
-      <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3">
-        Quedarme otros 5 Minutos
-      </button>
+      <div class="pt-1 flex flex-col gap-2">
+        <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3 cursor-pointer">
+          Keep Playing (Just 5 More Minutes)
+        </button>
+        <button id="fake-leave-btn" type="button" class="w-full text-[11px] text-amber-200/55 hover:text-amber-100 underline py-1.5 cursor-pointer transition">
+          No thanks, check out and exit anyway
+        </button>
+      </div>
     </div>
   </div>
 
@@ -115,7 +130,7 @@
       remainingSec--;
       if (remainingSec <= 1) {
         remainingSec = 14;
-        reasonEl.textContent = "🔄 Autoplay activado: 'Ya que esperaste hasta el 99%, cargamos el siguiente pasillo automáticamente.'";
+        reasonEl.textContent = "🔄 Autoplay engaged: 'Since you waited until 99%, we loaded the next hallway automatically.'";
         reasonEl.className = "text-[11px] text-cortez-gold font-semibold";
       }
       timerEl.textContent = `00:${String(remainingSec).padStart(2, "0")}`;
@@ -124,7 +139,7 @@
     document.getElementById("snooze-btn").addEventListener("click", () => {
       remainingSec = 15;
       timerEl.textContent = "00:15";
-      reasonEl.textContent = "💉 Dosis de postergación aplicada (+15s). El Panóptico sumó tu tiempo a La Condesa.";
+      reasonEl.textContent = "💉 Procrastination dose applied (+15s). The Panopticon added your time to The Countess.";
       window.addCortezSyntheticPixels(200);
     });
 
@@ -134,8 +149,8 @@
         const card = document.createElement("div");
         card.className = "deco-border bg-cortez-charcoal/85 p-4 space-y-1.5";
         card.innerHTML = `
-          <p class="text-[10px] font-mono text-cortez-gold">PROMESA INCUMPLIDA #${pIdx++}</p>
-          <p class="font-serif italic text-base text-amber-100/85">“Mañana empiezo sin falta. Solo deslizo un bloque más para cerrar en número par.”</p>
+          <p class="text-[10px] font-mono text-cortez-gold">BROKEN PROMISE #${pIdx++}</p>
+          <p class="font-serif italic text-base text-amber-100/85">“Tomorrow I'll start for sure. Just one more card so I end on an even number.”</p>
         `;
         feed.appendChild(card);
       }
@@ -143,7 +158,7 @@
 
     appendProcCards(4);
     window.addEventListener("scroll", () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight * 0.80) {
+      if (window.innerHeight + Math.max(0, window.scrollY) >= document.documentElement.scrollHeight * 0.80) {
         appendProcCards(3);
       }
     }, { passive: true });

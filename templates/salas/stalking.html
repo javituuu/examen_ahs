@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sala Stalking — Las Mirillas de March</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0D0D0D" />
+  <title>Stalking Wing — March's Peepholes</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script>
@@ -19,14 +22,21 @@
     }
   </script>
   <style>
-    body { background-color: #0D0D0D; color: #F3EAD6; overflow-x: hidden; }
+    html, body { background-color: #0D0D0D; color: #F3EAD6; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
     .deco-border { border: 1px solid #D4AF37; box-shadow: 0 0 18px rgba(212, 175, 55, 0.12); }
-    #checkout-btn { transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); touch-action: manipulation; }
+    button { -webkit-tap-highlight-color: transparent; }
+    #checkout-btn {
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
   </style>
 </head>
-<body class="min-h-screen font-sans pb-36 max-w-md mx-auto">
+<body class="min-h-[100dvh] font-sans pb-36 max-w-md mx-auto">
 
-  <!-- Toast de Alerta -->
+  <!-- Alert Toast -->
   <div id="escape-toast" class="fixed top-3 inset-x-3 z-50 hidden">
     <div class="bg-cortez-crimson border-2 border-cortez-gold text-white px-4 py-3 shadow-2xl flex items-center justify-between">
       <p id="escape-toast-msg" class="text-xs font-medium"></p>
@@ -34,17 +44,17 @@
     </div>
   </div>
 
-  <!-- HUD Superior -->
+  <!-- Top HUD -->
   <header class="sticky top-0 z-30 bg-cortez-black/95 backdrop-blur-md border-b border-cortez-gold/50 px-4 py-3 flex items-center justify-between">
     <div>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">HABITACIÓN --</span>
+        <span id="hud-room" class="font-deco text-sm font-bold text-cortez-gold">ROOM --</span>
       </div>
-      <p id="hud-guest" class="text-xs text-amber-100/70">Galería Oculta: Stalking (Mirillas)</p>
+      <p id="hud-guest" class="text-xs text-amber-100/70">Hidden Gallery: Stalking (Peepholes)</p>
     </div>
     <div class="text-right">
-      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Mirillas / Pasillo</p>
+      <p class="text-[10px] font-deco uppercase tracking-widest text-cortez-gold/80">Peepholes / Hallway</p>
       <p class="font-mono text-base font-bold text-amber-50"><span id="hud-meters">0.0</span> <span class="text-xs text-cortez-gold">m</span></p>
     </div>
   </header>
@@ -52,47 +62,52 @@
   <main class="px-4 pt-5 space-y-5">
     <div class="deco-border bg-cortez-charcoal p-5 text-center space-y-2">
       <span class="px-2 py-0.5 text-[10px] font-mono uppercase bg-emerald-950 text-emerald-300 border border-emerald-500/50">
-        Pecado Capital: Stalking • Vigilancia Horizontal
+        Deadly Sin: Stalking • Lateral Surveillance
       </span>
-      <h1 class="font-deco text-xl font-bold text-cortez-gold">LAS MIRILLAS DEL HOTEL</h1>
+      <h1 class="font-deco text-xl font-bold text-cortez-gold">THE HOTEL PEEPHOLES</h1>
       <p class="font-serif italic text-base text-amber-100/85">
-        “En el Panóptico Digital no solo te vigila el servidor: tú vigilas a tus propios compañeros de clase en tiempo real.”
+        “In the Digital Panopticon, not only does the server watch you: you watch your own classmates in real time.”
       </p>
     </div>
 
-    <!-- Lista en vivo de compañeros conectados al Hotel -->
+    <!-- Live List of Connected Classmates -->
     <div class="deco-border bg-cortez-charcoal/90 p-4 space-y-3">
       <div class="flex items-center justify-between border-b border-cortez-gold/30 pb-2">
         <h2 class="font-deco text-xs uppercase tracking-widest text-cortez-gold">
-          👁️ Compañeros en el Hotel Ahora Mismo
+          👁️ Guests Inside the Hotel Right Now
         </h2>
-        <span id="peers-count" class="font-mono text-[11px] text-emerald-300">Cargando...</span>
+        <span id="peers-count" class="font-mono text-[11px] text-emerald-300">Loading...</span>
       </div>
       <div id="peers-list" class="space-y-2.5"></div>
     </div>
 
-    <!-- Feed infinito de expedientes espiados -->
+    <!-- Infinite Surveillance Dossier Feed -->
     <div id="corridor-feed" class="space-y-4"></div>
   </main>
 
-  <!-- Botón Evasivo -->
-  <div class="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none flex justify-center">
+  <!-- Evasive Check-Out Button -->
+  <div class="fixed inset-x-0 z-40 px-4 pointer-events-none flex justify-center" style="bottom: max(1rem, env(safe-area-inset-bottom));">
     <button id="checkout-btn" type="button" class="pointer-events-auto bg-cortez-crimson text-amber-50 border border-cortez-gold px-5 py-2.5 font-deco text-xs uppercase tracking-[0.2em] shadow-2xl">
-      🚪 Hacer Check-Out (Salir)
+      🚪 Check-Out (Exit)
     </button>
   </div>
 
-  <!-- Modal Psicológico -->
+  <!-- Psychological Trap Modal -->
   <div id="psych-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-5">
     <div class="deco-border bg-cortez-charcoal max-w-sm w-full p-6 text-center space-y-4">
-      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Galería de Espejos Falsos</p>
-      <h3 class="font-deco text-xl font-bold text-amber-50">EL QUE ESPÍA TAMBIÉN ES ESPIADO</h3>
-      <p class="font-serif italic text-base text-amber-100/85">
-        “Mientras mirabas las habitaciones de tus compañeros, el proyector contabilizó cada segundo de tu atención.”
+      <p class="font-deco text-[10px] tracking-[0.3em] text-cortez-gold uppercase">Gallery of Two-Way Mirrors</p>
+      <h3 class="font-deco text-xl font-bold text-amber-50">THE WATCHER IS ALSO WATCHED</h3>
+      <p id="psych-modal-text" class="font-serif italic text-base text-amber-100/85">
+        “While you peeked into your classmates' rooms, the projector logged every second of your attention.”
       </p>
-      <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3">
-        Seguir Mirando por la Cerradura
-      </button>
+      <div class="pt-1 flex flex-col gap-2">
+        <button id="stay-btn" type="button" class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-widest py-3 cursor-pointer">
+          Keep Peeking Through the Keyhole (RECOMMENDED)
+        </button>
+        <button id="fake-leave-btn" type="button" class="w-full text-[11px] text-amber-200/55 hover:text-amber-100 underline py-1.5 cursor-pointer transition">
+          No thanks, check out and exit anyway
+        </button>
+      </div>
     </div>
   </div>
 
@@ -107,18 +122,18 @@
         const res = await fetch("/api/huespedes-espiados");
         const data = await res.json();
         const guests = data.guests || [];
-        peersCount.textContent = `${guests.length} conectados`;
+        peersCount.textContent = `${guests.length} connected`;
         peersList.innerHTML = "";
         guests.slice(0, 8).forEach((g) => {
           const item = document.createElement("div");
           item.className = "bg-black/60 border border-cortez-gold/30 p-3 flex items-center justify-between gap-2";
           item.innerHTML = `
             <div>
-              <p class="text-xs font-bold text-amber-50">Hab. ${g.room} — ${g.alias} <span class="text-[10px] font-mono text-cortez-gold">[${g.os}]</span></p>
-              <p class="text-[11px] text-amber-100/65">Pecado: ${g.pecado_digital} • ${g.meters.toFixed(1)}m recorridos</p>
+              <p class="text-xs font-bold text-amber-50">Room ${g.room} — ${g.alias} <span class="text-[10px] font-mono text-cortez-gold">[${g.os}]</span></p>
+              <p class="text-[11px] text-amber-100/65">Sin: ${g.pecado_digital} • ${g.meters.toFixed(1)}m scrolled</p>
             </div>
-            <button type="button" class="spy-btn shrink-0 px-2.5 py-1.5 bg-cortez-gold/20 hover:bg-cortez-gold hover:text-black border border-cortez-gold text-cortez-gold font-deco text-[10px] uppercase tracking-wider">
-              👁️ Espiar
+            <button type="button" class="spy-btn shrink-0 px-2.5 py-1.5 bg-cortez-gold/20 hover:bg-cortez-gold hover:text-black border border-cortez-gold text-cortez-gold font-deco text-[10px] uppercase tracking-wider cursor-pointer">
+              👁️ Spy
             </button>
           `;
           item.querySelector(".spy-btn").addEventListener("click", () => {
@@ -134,8 +149,8 @@
       const card = document.createElement("div");
       card.className = "deco-border bg-cortez-charcoal/90 p-4 space-y-1";
       card.innerHTML = `
-        <p class="text-[10px] font-mono text-emerald-400">MIRILLA ACTIVA • HABITACIÓN ${g.room}</p>
-        <p class="text-xs text-amber-50">Observaste a <strong>${g.alias}</strong> (${g.pecado_digital}). Lleva <strong>${g.meters.toFixed(1)}m</strong> de pasillo y <strong>${g.escape_attempts}</strong> intentos de fuga.</p>
+        <p class="text-[10px] font-mono text-emerald-400">ACTIVE PEEPHOLE • ROOM ${g.room}</p>
+        <p class="text-xs text-amber-50">You watched <strong>${g.alias}</strong> (${g.pecado_digital}). They have scrolled <strong>${g.meters.toFixed(1)}m</strong> with <strong>${g.escape_attempts}</strong> escape attempts.</p>
       `;
       feed.prepend(card);
     }
@@ -146,8 +161,8 @@
         const card = document.createElement("div");
         card.className = "deco-border bg-cortez-charcoal/80 p-4 space-y-1.5";
         card.innerHTML = `
-          <p class="text-[10px] font-mono text-cortez-gold">EXPEDIENTE DE VIGILANCIA #${sIdx++}</p>
-          <p class="font-serif italic text-base text-amber-100/85">“Crees que stalkear es un acto privado, pero tu curiosidad deja más metadatos que la persona que observas.”</p>
+          <p class="text-[10px] font-mono text-cortez-gold">SURVEILLANCE DOSSIER #${sIdx++}</p>
+          <p class="font-serif italic text-base text-amber-100/85">“You think stalking is a private act, yet your curiosity leaves behind more metadata than the person you watch.”</p>
         `;
         feed.appendChild(card);
       }
@@ -158,7 +173,7 @@
     setInterval(refreshPeers, 2500);
 
     window.addEventListener("scroll", () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight * 0.80) {
+      if (window.innerHeight + Math.max(0, window.scrollY) >= document.documentElement.scrollHeight * 0.80) {
         appendSpyLore(3);
       }
     }, { passive: true });

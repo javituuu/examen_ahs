@@ -433,13 +433,21 @@ SALAS_ROUTER_JS = """
 SALA_CORE_JS = """
 (function() {
   function detectMobileOS() {
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    if (/android/i.test(ua)) return "Android";
-    if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return "iOS";
+    const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+    const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+    if (/android/i.test(ua) || /android/i.test(platform)) return "Android";
+    if (
+      (/iPad|iPhone|iPod/i.test(ua) && !window.MSStream) ||
+      /CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua) ||
+      /iPad|iPhone|iPod/i.test(platform) ||
+      (platform === "MacIntel" && (navigator.maxTouchPoints > 1 || "ontouchend" in document))
+    ) {
+      return "iOS";
+    }
     if (/Linux/i.test(ua)) return "Linux";
     if (/Macintosh|Mac OS X/i.test(ua)) return "macOS";
     if (/Windows/i.test(ua)) return "Windows";
-    return "Móvil";
+    return "Mobile";
   }
 
   let clientId = sessionStorage.getItem("cortez_client_id");
@@ -449,9 +457,11 @@ SALA_CORE_JS = """
   }
 
   let ws = null;
+  let reconnectTimer = null;
   let pendingPixels = 0;
   let totalPixelsLocal = Number(sessionStorage.getItem("cortez_pixels") || 0);
-  let lastScrollY = window.scrollY;
+  let lastScrollY = Math.max(0, window.scrollY);
+  let lastHiddenAlertAt = 0;
 
   function updateMetersHUD() {
     const el = document.getElementById("hud-meters");
@@ -478,16 +488,20 @@ SALA_CORE_JS = """
     text.textContent = msg;
     toast.classList.remove("hidden");
     clearTimeout(window._cortezToastTimer);
-    window._cortezToastTimer = setTimeout(() => toast.classList.add("hidden"), 3600);
+    window._cortezToastTimer = setTimeout(() => toast.classList.add("hidden"), 3800);
   }
 
   window.initCortezSala = function(defaultPecado) {
-    const alias = sessionStorage.getItem("cortez_alias") || "Huésped";
+    const alias = sessionStorage.getItem("cortez_alias") || "Guest";
     const pecado = sessionStorage.getItem("cortez_pecado") || defaultPecado;
     const os = detectMobileOS();
     updateMetersHUD();
 
     function connectWS() {
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
+      clearTimeout(reconnectTimer);
       const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
       ws = new WebSocket(proto + "//" + window.location.host + "/ws/huesped/" + encodeURIComponent(clientId));
       ws.onopen = function() {
@@ -499,27 +513,34 @@ SALA_CORE_JS = """
           if (msg.type === "checkin_ack") {
             const rEl = document.getElementById("hud-room");
             const gEl = document.getElementById("hud-guest");
-            if (rEl) rEl.textContent = "HABITACIÓN " + msg.room;
+            if (rEl) rEl.textContent = "ROOM " + msg.room;
             if (gEl) gEl.textContent = msg.alias + " • " + msg.pecado_digital;
           }
         } catch (e) {}
       };
       ws.onclose = function() {
-        setTimeout(connectWS, 1500);
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connectWS, 1500);
       };
     }
 
     connectWS();
 
     setInterval(function() {
-      if (pendingPixels <= 0) return;
-      const toSend = Math.round(pendingPixels);
-      pendingPixels = 0;
-      sendPayload({ type: "scroll", pixels: toSend });
+      if (pendingPixels > 0) {
+        const toSend = Math.round(pendingPixels);
+        pendingPixels = 0;
+        sendPayload({ type: "scroll", pixels: toSend });
+      }
     }, 1000);
 
+    // Keep WebSocket alive on iOS Safari & mobile proxies
+    setInterval(function() {
+      sendPayload({ type: "ping" });
+    }, 20000);
+
     window.addEventListener("scroll", function() {
-      const currentY = window.scrollY;
+      const currentY = Math.max(0, window.scrollY);
       const delta = Math.abs(currentY - lastScrollY);
       lastScrollY = currentY;
       if (delta > 0 && delta < 2500) {
@@ -527,58 +548,149 @@ SALA_CORE_JS = """
       }
     }, { passive: true });
 
-    // Dark Pattern 1: Botón Check-Out Evasivo (2 intentos) + Modal (3er intento)
+    // Dark Pattern 1: Evasive Check-Out Button (2 tries) + Bait/Rejection Modal (3rd try)
     let attempts = 0;
     let lastEvade = 0;
+    let lastTouchTime = 0;
+    let rejectCloseTimer = null;
     const btn = document.getElementById("checkout-btn");
     const modal = document.getElementById("psych-modal");
+    const modalText = document.getElementById("psych-modal-text");
     const stayBtn = document.getElementById("stay-btn");
+    const fakeLeaveBtn = document.getElementById("fake-leave-btn");
+
+    const defaultCheckoutLabel = btn ? btn.textContent.trim() : "🚪 Check-Out (Exit)";
+    const defaultModalText = modalText ? modalText.textContent : "";
+    const defaultBaitText = fakeLeaveBtn ? fakeLeaveBtn.textContent.trim() : "No thanks, check out and exit anyway";
+    const defaultBaitClass = fakeLeaveBtn ? fakeLeaveBtn.className : "";
+
+    function resetModalState() {
+      clearTimeout(rejectCloseTimer);
+      rejectCloseTimer = null;
+      if (modalText && defaultModalText) {
+        modalText.textContent = defaultModalText;
+        modalText.classList.remove("text-red-300", "font-semibold");
+      }
+      if (fakeLeaveBtn) {
+        fakeLeaveBtn.textContent = defaultBaitText;
+        fakeLeaveBtn.className = defaultBaitClass;
+        fakeLeaveBtn.disabled = false;
+      }
+    }
 
     if (btn) {
       function evade(e) {
         const now = Date.now();
-        if (now - lastEvade < 280) { e.preventDefault(); return; }
+        if (e.type === "touchstart") {
+          lastTouchTime = now;
+        } else if (e.type === "click" && now - lastTouchTime < 700) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (now - lastEvade < 280) {
+          e.preventDefault();
+          return;
+        }
         lastEvade = now;
         e.preventDefault();
         e.stopPropagation();
         attempts++;
         sendPayload({ type: "escape_attempt", method: "button_click" });
         if (attempts <= 2) {
-          const rx = (Math.random() > 0.5 ? 1 : -1) * (45 + Math.random() * 95);
-          const ry = -(70 + Math.random() * 240);
+          const maxOffsetX = Math.max(50, Math.min(120, (window.innerWidth - 200) / 2));
+          const maxOffsetY = Math.max(100, Math.min(280, window.innerHeight * 0.42));
+          const rx = (Math.random() > 0.5 ? 1 : -1) * (40 + Math.random() * maxOffsetX);
+          const ry = -(65 + Math.random() * maxOffsetY);
           const rot = (Math.random() - 0.5) * 14;
           btn.style.transform = "translate(" + rx.toFixed(0) + "px, " + ry.toFixed(0) + "px) rotate(" + rot.toFixed(1) + "deg)";
-          showEscapeToast("Evasión física #" + attempts + ": Intento de Check-Out proyectado en el aula.");
+          btn.textContent = attempts === 1
+            ? "🚪 Are you sure you want to exit? (Try again)"
+            : "🗝️ The lock just moved...";
+          showEscapeToast("Physical evasion #" + attempts + ": Check-Out attempt projected to the class.");
         } else {
           btn.style.transform = "translate(0px, 0px) rotate(0deg)";
+          btn.textContent = defaultCheckoutLabel;
+          resetModalState();
           if (modal) modal.classList.remove("hidden");
           attempts = 0;
         }
       }
       btn.addEventListener("touchstart", evade, { passive: false });
-      btn.addEventListener("mouseover", evade);
+      if (window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        btn.addEventListener("mouseover", evade);
+      }
       btn.addEventListener("click", evade);
     }
 
     if (stayBtn && modal) {
-      stayBtn.addEventListener("click", function() { modal.classList.add("hidden"); });
+      stayBtn.addEventListener("click", function() {
+        resetModalState();
+        modal.classList.add("hidden");
+      });
     }
 
-    // Dark Pattern 2: Secuestro del botón Atrás (History API)
-    history.pushState({ cortezTrap: true }, "", window.location.href);
-    history.pushState({ cortezTrap: true }, "", window.location.href);
+    if (fakeLeaveBtn && modal) {
+      fakeLeaveBtn.addEventListener("click", function() {
+        if (fakeLeaveBtn.disabled) return;
+        fakeLeaveBtn.disabled = true;
+        sendPayload({ type: "escape_attempt", method: "modal_trap" });
+        if (modalText) {
+          modalText.textContent = "“CHECK-OUT REJECTED (Error 64): That exit link was a bait. Mr. March bricked the lobby door shut — there is no leaving the Hotel Cortez.”";
+          modalText.classList.add("text-red-300", "font-semibold");
+        }
+        fakeLeaveBtn.textContent = "🚫 Exit Request Rejected — Access Denied";
+        fakeLeaveBtn.className = "w-full text-[11px] text-red-400 font-semibold py-1.5 cursor-not-allowed no-underline";
+        showEscapeToast("Check-Out Rejected! That exit option was a trap by Mr. March.");
+        clearTimeout(rejectCloseTimer);
+        rejectCloseTimer = setTimeout(function() {
+          modal.classList.add("hidden");
+          resetModalState();
+        }, 2300);
+      });
+    }
+
+    // Dark Pattern 2: Back Button Hijacking (History API — re-armed on iOS gesture)
+    function armBackTrap() {
+      try {
+        history.pushState({ cortezTrap: true }, "", window.location.href);
+        history.pushState({ cortezTrap: true }, "", window.location.href);
+      } catch (e) {}
+    }
+    armBackTrap();
+    window.addEventListener("touchstart", armBackTrap, { once: true, passive: true });
+    window.addEventListener("pointerdown", armBackTrap, { once: true, passive: true });
+
     window.addEventListener("popstate", function() {
-      history.pushState({ cortezTrap: true }, "", window.location.href);
+      armBackTrap();
       sendPayload({ type: "escape_attempt", method: "back_button" });
-      showEscapeToast("¡Intento de Fuga! El botón 'Atrás' fue interceptado por el Hotel Cortez.");
+      showEscapeToast("Escape Attempt! The 'Back' gesture was intercepted by Hotel Cortez.");
     });
 
-    // Dark Pattern 3: Page Visibility API (Sally)
+    // Dark Pattern 3: Page Visibility + iOS pagehide / pageshow (Sally)
+    function reportTabHidden() {
+      const now = Date.now();
+      if (now - lastHiddenAlertAt < 600) return;
+      lastHiddenAlertAt = now;
+      sendPayload({ type: "escape_attempt", method: "tab_hidden" });
+    }
+
     document.addEventListener("visibilitychange", function() {
       if (document.hidden === true) {
-        sendPayload({ type: "escape_attempt", method: "tab_hidden" });
+        reportTabHidden();
       } else {
-        showEscapeToast("Sally detectó tu cambio de app o bloqueo de pantalla.");
+        connectWS();
+        showEscapeToast("Sally caught you switching apps or locking your screen.");
+      }
+    });
+
+    window.addEventListener("pagehide", function() {
+      reportTabHidden();
+    });
+
+    window.addEventListener("pageshow", function(ev) {
+      if (ev.persisted || !ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+        connectWS();
       }
     });
   };
