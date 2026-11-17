@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Cortez — Scan to Check-In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cortez: {
+              black: '#0D0D0D',
+              charcoal: '#151311',
+              gold: '#D4AF37',
+              crimson: '#8B0000'
+            }
+          },
+          fontFamily: {
+            deco: ['Cinzel', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0D0D0D;
+      color: #F5EFE0;
+      background-image:
+        radial-gradient(circle at 50% 35%, rgba(212, 175, 55, 0.14) 0%, transparent 62%),
+        repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.025) 0px, rgba(212, 175, 55, 0.025) 1px, transparent 1px, transparent 18px);
+    }
+    .deco-frame {
+      border: 1px solid rgba(212, 175, 55, 0.65);
+      box-shadow: 0 0 36px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(212, 175, 55, 0.06);
+    }
+    #qrcode-canvas img,
+    #qrcode-canvas canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans select-none">
+
+  <main class="deco-frame bg-cortez-charcoal/95 px-6 py-7 sm:px-10 sm:py-9 max-w-2xl w-full text-center flex flex-col items-center gap-5">
+    <div>
+      <p class="font-deco text-xs sm:text-sm tracking-[0.35em] text-cortez-gold uppercase mb-1">
+        Hotel Cortez • Est. 1926
+      </p>
+      <h1 class="font-deco text-2xl sm:text-4xl font-black tracking-[0.15em] text-amber-50">
+        SCAN TO CHECK-IN
+      </h1>
+    </div>
+
+    <div class="bg-white p-5 sm:p-7 border-4 border-cortez-gold shadow-2xl inline-flex items-center justify-center">
+      <div id="qrcode-canvas"></div>
+    </div>
+
+    <p id="qr-url-text" class="font-mono text-xs sm:text-base text-cortez-gold break-all bg-black/75 px-4 py-2.5 border border-cortez-gold/40 w-full max-w-lg"></p>
+
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+      <a
+        href="/checkin"
+        class="px-5 py-2.5 border border-cortez-gold/70 bg-cortez-black hover:bg-cortez-gold hover:text-cortez-black text-cortez-gold font-deco text-xs font-bold uppercase tracking-[0.2em] transition"
+      >
+        ← Back to Check-In
+      </a>
+    </div>
+  </main>
+
+  <script>
+    const checkinUrl = `${window.location.origin}/checkin`;
+    document.getElementById("qr-url-text").textContent = checkinUrl;
+
+    function renderLargeQR() {
+      const container = document.getElementById("qrcode-canvas");
+      if (!container || typeof QRCode === "undefined") return;
+      container.innerHTML = "";
+      const size = Math.max(220, Math.min(480, Math.floor(Math.min(window.innerWidth * 0.68, window.innerHeight * 0.52))));
+      new QRCode(container, {
+        text: checkinUrl,
+        width: size,
+        height: size,
+        colorDark: "#0D0D0D",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    renderLargeQR();
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(renderLargeQR, 150);
+    });
+  </script>
+</body>
+</html>

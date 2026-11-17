@@ -281,13 +281,22 @@
       <p class="text-xs text-amber-100/70">
         If you are using <code class="font-mono text-cortez-gold">cloudflared</code>, open the Panopticon from the HTTPS URL of the tunnel so that the QR code points automatically to the public link.
       </p>
-      <button
-        id="close-qr-btn"
-        type="button"
-        class="w-full bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3 cursor-pointer"
-      >
-        Close [Esc / Q]
-      </button>
+      <div class="flex flex-col sm:flex-row gap-2.5">
+        <a
+          href="/qr"
+          target="_blank"
+          class="flex-1 border border-cortez-gold/70 bg-cortez-black hover:bg-cortez-gold/15 text-cortez-gold font-deco font-bold text-xs uppercase tracking-[0.18em] py-3 text-center transition"
+        >
+          Fullscreen QR (/qr)
+        </a>
+        <button
+          id="close-qr-btn"
+          type="button"
+          class="flex-1 bg-cortez-gold text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3 cursor-pointer"
+        >
+          Close [Esc / Q]
+        </button>
+      </div>
     </div>
   </div>
 

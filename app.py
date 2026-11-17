@@ -602,6 +602,11 @@ async def get_checkin(request: Request) -> HTMLResponse:
     return HTMLResponse(content=injected)
 
 
+@app.get("/qr", response_class=HTMLResponse)
+async def get_qr(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request=request, name="qr.html")
+
+
 @app.get("/sala/{pecado}", response_class=HTMLResponse)
 async def get_sala(request: Request, pecado: str) -> HTMLResponse:
     template_name = SALA_TEMPLATE_MAP.get(pecado.lower().strip(), "salas/doomscrolling.html")

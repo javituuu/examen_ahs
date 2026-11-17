@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cortez Hotel — Guest Registry</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -144,8 +145,53 @@
           Sign book and get the key.
         </button>
       </form>
+
+      <div class="mt-5 pt-4 border-t border-cortez-gold/25 flex flex-col sm:flex-row gap-2.5">
+        <button
+          id="open-checkin-qr-btn"
+          type="button"
+          class="flex-1 border border-cortez-gold/70 bg-cortez-black/80 hover:bg-cortez-gold hover:text-cortez-black text-cortez-gold font-deco font-bold uppercase tracking-[0.18em] py-2.5 px-3 text-xs transition cursor-pointer"
+        >
+          Show Large QR
+        </button>
+        <a
+          href="/qr"
+          class="sm:w-auto text-center border border-cortez-gold/40 bg-black/50 hover:border-cortez-gold text-amber-100/80 hover:text-cortez-gold font-deco uppercase tracking-[0.16em] py-2.5 px-4 text-xs transition"
+        >
+          QR Page
+        </a>
+      </div>
     </div>
   </main>
+
+  <!-- LARGE QR CODE MODAL -->
+  <div id="checkin-qr-modal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+    <div class="deco-border deco-corner bg-cortez-charcoal max-w-lg w-full p-6 sm:p-8 text-center space-y-5">
+      <div>
+        <p class="font-deco text-[11px] tracking-[0.3em] text-cortez-gold uppercase">Hotel Cortez • Reception</p>
+        <h2 class="font-deco text-2xl sm:text-3xl font-bold text-amber-50 mt-1">SCAN TO CHECK-IN</h2>
+      </div>
+      <div class="bg-white p-5 sm:p-6 inline-flex items-center justify-center mx-auto border-4 border-cortez-gold shadow-2xl">
+        <div id="checkin-qrcode-canvas"></div>
+      </div>
+      <p id="checkin-qr-url-text" class="font-mono text-xs sm:text-sm text-cortez-gold break-all bg-black/75 p-2.5 border border-cortez-gold/40"></p>
+      <div class="flex flex-col sm:flex-row gap-2.5">
+        <a
+          href="/qr"
+          class="flex-1 border border-cortez-gold/70 bg-cortez-black hover:bg-cortez-gold/15 text-cortez-gold font-deco font-bold text-xs uppercase tracking-[0.18em] py-3 text-center transition"
+        >
+          Open QR-Only Page
+        </a>
+        <button
+          id="close-checkin-qr-btn"
+          type="button"
+          class="flex-1 bg-cortez-gold hover:bg-amber-400 text-cortez-black font-deco font-bold text-xs uppercase tracking-[0.2em] py-3 cursor-pointer transition"
+        >
+          Close [Esc]
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- VISTA 2: EL LABERINTO DE MARCH (SCROLL INFINITO + DARK PATTERNS) -->
   <section id="labyrinth-view" class="hidden min-h-screen pb-36 max-w-md mx-auto">
@@ -533,6 +579,61 @@
         sendPayload({ type: "escape_attempt", method: "tab_hidden" });
       } else {
         showEscapeToast("Sally te vio cambiar de app o bloquear la pantalla. El proyector registró tu deserción.");
+      }
+    });
+
+    // =========================================================================
+    // 7. LARGE CHECK-IN QR MODAL ON LOGIN SCREEN
+    // =========================================================================
+    const checkinQrModal = document.getElementById("checkin-qr-modal");
+    const openCheckinQrBtn = document.getElementById("open-checkin-qr-btn");
+    const closeCheckinQrBtn = document.getElementById("close-checkin-qr-btn");
+    const checkinQrContainer = document.getElementById("checkin-qrcode-canvas");
+    const checkinQrUrlText = document.getElementById("checkin-qr-url-text");
+    const checkinShareUrl = `${window.location.origin}/checkin`;
+
+    function renderCheckinLargeQR() {
+      if (!checkinQrContainer || typeof QRCode === "undefined") return;
+      checkinQrContainer.innerHTML = "";
+      const size = Math.max(220, Math.min(360, Math.floor(Math.min(window.innerWidth - 110, window.innerHeight - 300))));
+      new QRCode(checkinQrContainer, {
+        text: checkinShareUrl,
+        width: size,
+        height: size,
+        colorDark: "#0D0D0D",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    if (checkinQrUrlText) {
+      checkinQrUrlText.textContent = checkinShareUrl;
+    }
+
+    if (openCheckinQrBtn && checkinQrModal) {
+      openCheckinQrBtn.addEventListener("click", () => {
+        checkinQrModal.classList.remove("hidden");
+        renderCheckinLargeQR();
+      });
+    }
+
+    if (closeCheckinQrBtn && checkinQrModal) {
+      closeCheckinQrBtn.addEventListener("click", () => {
+        checkinQrModal.classList.add("hidden");
+      });
+    }
+
+    if (checkinQrModal) {
+      checkinQrModal.addEventListener("click", (e) => {
+        if (e.target === checkinQrModal) {
+          checkinQrModal.classList.add("hidden");
+        }
+      });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && checkinQrModal && !checkinQrModal.classList.contains("hidden")) {
+        checkinQrModal.classList.add("hidden");
       }
     });
   </script>
