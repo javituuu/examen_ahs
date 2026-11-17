@@ -1,4 +1,22 @@
+# Python environments & bytecode
 .venv/
+venv/
+env/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Runtime logs & environment files
 .cortez_tunnel.log
+*.log
+.env
+.env.*
+
+# Caches & editor/OS files
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

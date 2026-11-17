@@ -1,39 +1,53 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 cd "$(dirname "$0")"
 
-PORT=8000
+PORT="${PORT:-8000}"
 TUNNEL_LOG=".cortez_tunnel.log"
 rm -f "$TUNNEL_LOG"
 
+if [ -x "./.venv/bin/uvicorn" ]; then
+  UVICORN_BIN="./.venv/bin/uvicorn"
+elif [ -x "./venv/bin/uvicorn" ]; then
+  UVICORN_BIN="./venv/bin/uvicorn"
+elif command -v uvicorn >/dev/null 2>&1; then
+  UVICORN_BIN="$(command -v uvicorn)"
+else
+  echo "[Error] 'uvicorn' not found. Create a virtual environment and install requirements:"
+  echo "        python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt"
+  exit 1
+fi
+
 echo "================================================================"
-echo "  HOTEL CORTEZ (CortezOS) — Inicializando Servidor y Túnel"
+echo "  HOTEL CORTEZ (CortezOS) — Starting Server & Tunnel"
 echo "================================================================"
 
-# 1. Levantar Uvicorn en segundo plano
-./.venv/bin/uvicorn app:app --host 0.0.0.0 --port "$PORT" --log-level warning &
+# 1. Start Uvicorn in the background
+"$UVICORN_BIN" app:app --host 0.0.0.0 --port "$PORT" --log-level warning &
 UVICORN_PID=$!
 
 cleanup() {
   echo ""
-  echo "[CortezOS] Cerrando puertas del Hotel Cortez..."
+  echo "[CortezOS] Closing Hotel Cortez doors..."
   kill "$UVICORN_PID" 2>/dev/null || true
   if [ -n "${CLOUDFLARED_PID:-}" ]; then
     kill "$CLOUDFLARED_PID" 2>/dev/null || true
   fi
+  rm -f "$TUNNEL_LOG"
 }
 trap cleanup EXIT INT TERM
 
 sleep 1.2
-echo "[OK] Servidor FastAPI activo en:"
-echo "     • Proyector Local: http://localhost:${PORT}/panoptico"
-echo "     • Check-In Local:  http://localhost:${PORT}/checkin"
+echo "[OK] FastAPI server active at:"
+echo "     • Projector (Panopticon): http://localhost:${PORT}/panoptico"
+echo "     • Guest Check-In:         http://localhost:${PORT}/checkin"
+echo "     • Fullscreen QR:          http://localhost:${PORT}/qr"
 
-# 2. Verificar e iniciar Cloudflare Quick Tunnel (Zero-Config, sin cuenta)
+# 2. Check and start Cloudflare Quick Tunnel (zero-config, no account needed)
 if command -v cloudflared >/dev/null 2>&1; then
   echo ""
-  echo "[Cloudflare] Abriendo Quick Tunnel HTTPS/WSS hacia localhost:${PORT}..."
+  echo "[Cloudflare] Opening HTTPS/WSS Quick Tunnel to localhost:${PORT}..."
   cloudflared tunnel --url "http://localhost:${PORT}" --no-autoupdate > "$TUNNEL_LOG" 2>&1 &
   CLOUDFLARED_PID=$!
 
@@ -48,22 +62,23 @@ if command -v cloudflared >/dev/null 2>&1; then
 
   if [ -n "$PUBLIC_URL" ]; then
     echo "================================================================"
-    echo "  🌐 TÚNEL PÚBLICO ACTIVO (4G / 5G / Wi-Fi):"
-    echo "  • Proyector (abre este link para que el QR sea público):"
+    echo "  PUBLIC TUNNEL ACTIVE (4G / 5G / Wi-Fi):"
+    echo "  • Projector (open this link so the QR code uses the public URL):"
     echo "    ${PUBLIC_URL}/panoptico"
     echo ""
-    echo "  • Link directo para celulares de la clase:"
+    echo "  • Direct mobile check-in link:"
     echo "    ${PUBLIC_URL}/checkin"
     echo "================================================================"
   else
-    echo "[Aviso] cloudflared sigue negociando la URL. Revisa $TUNNEL_LOG"
+    echo "[Notice] cloudflared is still negotiating the URL. Check $TUNNEL_LOG"
   fi
 else
   echo ""
-  echo "[Aviso] No se encontró 'cloudflared' en el PATH."
-  echo "        En Arch Linux instálalo con: sudo pacman -S cloudflared"
+  echo "[Notice] 'cloudflared' not found in PATH."
+  echo "         Install it to expose a public HTTPS/WSS URL for mobile devices:"
+  echo "         https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"
 fi
 
 echo ""
-echo "Presiona Ctrl+C para detener CortezOS."
+echo "Press Ctrl+C to stop CortezOS."
 wait "$UVICORN_PID"
